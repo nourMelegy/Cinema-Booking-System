@@ -1,0 +1,29 @@
+/*We get total revenuse depending on date and confirmed status */
+create function fn_getDailyRevenue (
+@Target_data Date
+)
+returns money 
+as
+begin
+	declare @total money ;
+	select @total =sum( Total_Amount)
+	from Booking
+	where cast( Booking_date As date ) = @Target_data and Booking_Status ='Confirmed';
+	return isnull(@total ,0);
+end;
+
+
+/*this return status of payment and booking status*/
+create function get_payment_status( @BookingID int )
+	returns nvarchar(30)
+as
+begin
+	declare @pstatus nvarchar(50);
+	declare @Bstatus nvarchar(50);
+	select @pstatus =p.status , @Bstatus =Booking_Status
+	from payment p
+	join Booking b on b.Payment_ID = p.payment_id
+	where b.Booking_ID = @BookingID;
+	return @Bstatus +' '+ @pstatus ;
+end;
+
