@@ -1,5 +1,5 @@
 -- ============================================================================
--- 1. CREATE TABLES
+-- 1. CREATION of TABLES
 -- ============================================================================
  
 -- Create Movie Table
@@ -15,7 +15,7 @@ CREATE TABLE Movie (
     CONSTRAINT CK_AgeRating CHECK (AgeRating IN ('G', 'PG', 'PG-13', 'R', '+13', '+18'))
 );
  
--- Create Movie_Genre Table (handles multivalued genre attribute)
+-- Create Movie_Genre Table (because multivalued)
 CREATE TABLE Movie_Genre (
     EIDR VARCHAR(20),
     Genre VARCHAR(50) NOT NULL,
