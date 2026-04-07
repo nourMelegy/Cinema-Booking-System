@@ -1,0 +1,45 @@
+
+/*cancelling the booking*/
+create procedure cancel_booking
+	@bookingid int
+
+as 
+begin
+		declare @PayID int
+	-- geting payment id corsponding to this booking id
+	select @PayID = Payment_ID
+	from Booking 
+	where Booking_ID = @BookingID;
+	begin transaction;
+    begin try
+        -- Update Booking Table
+        update Booking 
+        set Booking_Status = 'Cancelled' 
+        where Booking_ID = @BookingID;
+
+        -- Update Payment Table
+        update payment 
+        set status = 'Voided' 
+        where payment_id = @PayID;
+
+        commit transaction;
+    end try
+    begin catch
+        rollback transaction ;
+        throw; 
+    end catch
+end;
+
+
+
+create procedure sp_UpdatePaymentMethod
+    @BookingID int,
+    @NewMethod nvarchar(50)
+as
+begin
+    update payment
+    set Payment_Method = @NewMethod
+    from payment P
+    join Booking B on P.payment_id = B.Payment_ID
+    where B.Booking_ID = @BookingID;
+end;
