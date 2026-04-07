@@ -1,0 +1,42 @@
+
+CREATE TABLE [Customer] (
+    [customer_ID] INT PRIMARY KEY,
+);
+
+CREATE TABLE [Show] (
+    [show_Number] INT PRIMARY KEY,
+);
+
+CREATE TABLE [payment] (
+    [payment_id] INT PRIMARY KEY,
+    [Payment_Method] NVARCHAR(50),
+    [Amount] MONEY,
+    [status] NCHAR(15)
+);
+
+CREATE TABLE [Booking] (
+    [Booking_ID] INT PRIMARY KEY,
+    [Booking_Status] NVARCHAR(15),
+    [Total_Amount] MONEY,
+    [Booking_date] DATETIME,
+    
+    [B_shownumber] INT NOT NULL,  
+    [Customer_ID] INT NOT NULL,   
+    [Payment_ID] INT NOT NULL,    
+    
+    CONSTRAINT FK_Booking_Show FOREIGN KEY ([B_shownumber]) 
+        REFERENCES [Show]([show_Number]),
+    CONSTRAINT FK_Booking_Customer FOREIGN KEY ([Customer_ID]) 
+        REFERENCES [Customer]([customer_ID]),
+    CONSTRAINT FK_Booking_Payment FOREIGN KEY ([Payment_ID]) 
+        REFERENCES [payment]([payment_id]),
+        
+    CONSTRAINT UQ_Booking_Payment UNIQUE ([Payment_ID])
+);
+
+CREATE TABLE [Ticket] (
+    [Ticket_ID] INT PRIMARY KEY,
+    [TBooking_ID] INT NOT NULL,
+    CONSTRAINT FK_Ticket_Booking FOREIGN KEY ([TBooking_ID]) 
+        REFERENCES [Booking]([Booking_ID])
+);
