@@ -1,0 +1,6 @@
+HallNumber	int	Unchecked
+SeatNumber	int	Unchecked
+SeatArrangement	varchar(50)	Checked
+
+PRIMARY KEY (HNumber, SeatNumber)
+FOREIGN KEY (HNumber) REFERENCES Hall(HallNumber)
