@@ -1,11 +1,11 @@
 TicketID	int	Unchecked
 TicketStatus	varchar(50)	Checked  CHECK (TicketStatus IN ('Booked','Cancelled','Pending')),
-SeatType	varchar(50)	Unchecked  CHECK (Seat_Type IN ('Standard', 'VIP', 'Gold', 'Accessible'));
+SeatType	varchar(50)	Unchecked  CHECK (SeatType IN ('Standard', 'VIP', 'Gold', 'Accessible'));
 SeatNumber	int	Unchecked
 HallNumber	int	Unchecked
 BookingID	int	Unchecked
 
-Seat_Type IN ('Standard', 'VIP', 'Gold', 'Accessible')
+SeatType IN ('Standard', 'VIP', 'Gold', 'Accessible')
 TicketStatus IN ('Booked','Cancelled','Pending')
 FOREIGN KEY (BookingID) REFERENCES Booking(BookingID)
 FOREIGN KEY (HNumber, SeatNumber) REFERENCES Seats(HNumber, SeatNumber)
