@@ -1,0 +1,26 @@
+-- This is a sample of data insertion: 
+
+INSERT INTO Seats VALUES 
+ (1, 1, 'Front-Left'),
+ (1, 2, 'Front-Center'),
+ (4, 3, 'Front-Right'),
+ (7, 1, 'Balcony-Left'),
+ (10, 2, 'Balcony-Center');
+ 
+
+-- Since we have on average 200 seats per hall, hence we need to generate 200 seats for 10 halls:
+
+DECLARE @hall INT = 1;
+DECLARE @seat INT;
+
+WHILE @hall <= 10
+BEGIN
+    SET @seat = 1;
+    WHILE @seat <= 200
+    BEGIN
+        INSERT INTO Seats (HallNumber, SeatNumber, SeatArrangement)
+        VALUES (@hall, @seat, CONCAT('Hall ', @hall, ' Seat ', @seat));
+        SET @seat = @seat + 1; -- Seats incrementation
+    END;
+    SET @hall = @hall + 1;  -- Hall incrementation
+END;
