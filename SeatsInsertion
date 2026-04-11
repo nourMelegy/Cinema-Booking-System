@@ -7,6 +7,9 @@ INSERT INTO Seats VALUES
  (7, 1, 'Balcony-Left'),
  (10, 2, 'Balcony-Center');
  
+---------------------------------------------------------------------------------------------------
+
+-- Extra:
 
 -- Since we have on average 200 seats per hall, hence we need to generate 200 seats for 10 halls:
 
