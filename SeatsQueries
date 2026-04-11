@@ -1,0 +1,66 @@
+-- Seats Table Queries
+-- Seats (HallNumber, SeatNumber, SeatArrangement)
+
+
+
+-- 1. SELECT FROM:
+SELECT * FROM Seats;
+
+SELECT HallNumber, SeatNumber
+FROM Seats;
+
+
+-- 2. SELECT WHERE:
+SELECT * FROM Seats
+WHERE HallNumber = 1;
+
+SELECT * FROM Seats
+WHERE SeatArrangement = 'Gold';
+
+
+-- 3. SELECT DISTINCT:
+SELECT DISTINCT SeatArrangement
+FROM Seats;
+
+
+-- 4. SELECT ORDER BY:
+SELECT * FROM Seats
+ORDER BY HallNumber ASC, SeatNumber ASC;
+
+
+-- 5. SELECT GROUP BY:
+SELECT HallNumber, COUNT(*) AS TotalSeats
+FROM Seats
+GROUP BY HallNumber;
+
+
+-- 6. GROUP BY + HAVING:
+SELECT HallNumber, COUNT(*) AS TotalSeats
+FROM Seats
+GROUP BY HallNumber
+HAVING COUNT(*) > 3;
+
+
+-- 7. Subquery:
+SELECT * FROM Seats
+WHERE HallNumber IN (
+    SELECT HallNumber FROM Ticket
+    WHERE SeatType = 'VIP'
+);
+
+
+
+-- Check:
+
+SELECT COUNT(*) AS TotalRows FROM Seats;
+
+
+SELECT HallNumber, SeatNumber, COUNT(*) AS Duplicates
+FROM Seats
+GROUP BY HallNumber, SeatNumber
+HAVING COUNT(*) > 1;
+
+
+SELECT * FROM Seats
+WHERE HallNumber IS NULL
+   OR SeatNumber IS NULL;
