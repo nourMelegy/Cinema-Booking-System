@@ -1,0 +1,54 @@
+-- This is a sample of data insertion: 
+
+INSERT INTO Ticket VALUES 
+
+ (501, 'Booked', 'VIP', 1, 1, 1001),
+ (512, 'Booked', 'Accessible', 25, 6, 1201),
+ (523, 'Pending', 'Standard', 39, 4, 1032),
+ (534, 'Booked', 'VIP', 42, 7, 1403),
+ (541, 'Booked', 'Gold', 108, 10, 1561),
+ (552, 'Booked', 'Standard', 200, 5, 1603),
+ (573, 'Pending', 'Accessible', 56, 2, 1007),
+ (564, 'Cancelled', 'VIP', 63, 8, 1083),
+ (581, 'Booked', 'Standard', 50, 3, 1090),
+ (592, 'Cancelled', 'Gold', 98, 9, 1111);
+
+--------------------------------------------------------------------
+
+-- Extra:
+
+-- We need to generate tickets for the 2000 seats:
+
+DECLARE @hall INT = 1;
+DECLARE @seat INT = 1;
+DECLARE @ticketID INT = 10001;
+DECLARE @bookingID INT = 50001;
+
+WHILE @hall <= 10
+BEGIN
+    -- SET @seat = 1;
+    WHILE @seat <= 200
+    BEGIN
+        INSERT INTO Ticket (TicketID, TicketStatus, SeatType, SeatNumber, BookingID, HallNumber)
+        VALUES (@ticketID,
+                CASE 
+                    WHEN @seat % 3 = 0 THEN 'Cancelled'
+                    WHEN @seat % 2 = 0 THEN 'Pending'
+                    ELSE 'Booked'
+                END,
+                CASE 
+                    WHEN @seat % 4 = 1 THEN 'Standard'
+                    WHEN @seat % 4 = 2 THEN 'VIP'
+                    WHEN @seat % 4 = 3 THEN 'Gold'
+                    ELSE 'Accessible'
+                END,
+                @seat,
+                @bookingID,
+                @hall);
+
+        SET @seat = @seat + 1;
+        SET @ticketID = @ticketID + 1;
+        SET @bookingID = @bookingID + 1;
+    END;
+    SET @hall = @hall + 1;
+END;
