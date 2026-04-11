@@ -1,0 +1,124 @@
+-- =============================================
+-- Ticket stored procedure and functions
+-- Ticket (TicketID, TicketStatus, SeatType, SeatNumber, HallNumber, BookingID)
+
+
+-- Stored Procedures:
+
+/*
+-- 1. GetTicketsByStatus
+CREATE PROCEDURE GetTicketsByStatus
+    @TicketStatus VARCHAR(50)
+AS
+BEGIN
+    SELECT * FROM Ticket
+    WHERE TicketStatus = @TicketStatus;
+END;
+GO
+
+-- Check:
+EXEC GetTicketsByStatus @TicketStatus = 'Pending';
+*/
+
+
+/*
+-- 2. InsertTicket
+CREATE PROCEDURE InsertTicket
+    @TicketID     INT,
+    @TicketStatus VARCHAR(50),
+    @SeatType     VARCHAR(50),
+    @SeatNumber   INT,
+    @HallNumber   INT,
+    @BookingID    INT
+AS
+BEGIN
+    INSERT INTO Ticket (TicketID, TicketStatus, SeatType, SeatNumber, HallNumber, BookingID)
+    VALUES (@TicketID, @TicketStatus, @SeatType, @SeatNumber, @HallNumber, @BookingID);
+END;
+GO
+
+-- Check:
+EXEC InsertTicket @TicketID = 10, @TicketStatus = 'Booked',
+                  @SeatType = 'VIP', @SeatNumber = 1,
+                  @HallNumber = 1, @BookingID = 101;
+*/
+
+
+/*
+-- 3. Update ticket status
+CREATE PROCEDURE UpdateTicketStatus
+    @TicketID  INT,
+    @NewStatus VARCHAR(50)
+AS
+BEGIN
+    UPDATE Ticket
+    SET TicketStatus = @NewStatus
+    WHERE TicketID = @TicketID;
+END;
+GO
+
+-- Check:
+EXEC UpdateTicketStatus @TicketID = 1, @NewStatus = 'Cancelled';
+*/
+
+
+/*
+-- 4. Delete a ticket
+CREATE PROCEDURE DeleteTicket
+    @TicketID INT
+AS
+BEGIN
+    DELETE FROM Ticket
+    WHERE TicketID = @TicketID;
+END;
+GO
+
+-- Check:
+EXEC DeleteTicket @TicketID = 10;
+*/
+
+
+-- Stored Functions:
+
+/*
+-- 5. Count tickets by status
+CREATE FUNCTION CountTicketsByStatus (@Status VARCHAR(50))
+RETURNS INT
+AS
+BEGIN
+    DECLARE @Total INT;
+    SELECT @Total = COUNT(*)
+    FROM Ticket
+    WHERE TicketStatus = @Status;
+    RETURN @Total;
+END;
+GO
+
+-- Check:
+SELECT dbo.CountTicketsByStatus('Booked') AS TotalBooked;
+*/
+
+
+/*
+-- 6. Check if a seat is taken
+CREATE FUNCTION IsSeatTaken (@HallNumber INT, @SeatNumber INT)
+RETURNS VARCHAR(10)
+AS
+BEGIN
+    DECLARE @Result VARCHAR(10);
+    IF EXISTS (
+        SELECT 1 FROM Ticket
+        WHERE HallNumber = @HallNumber
+          AND SeatNumber = @SeatNumber
+          AND TicketStatus = 'Booked'
+    )
+        SET @Result = 'Taken';
+    ELSE
+        SET @Result = 'Available';
+    RETURN @Result;
+END;
+GO
+
+-- Check:
+SELECT dbo.IsSeatTaken(1, 1) AS SeatStatus;
+*/
