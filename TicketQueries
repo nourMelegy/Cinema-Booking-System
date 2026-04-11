@@ -1,0 +1,100 @@
+-- Ticket Queries
+-- Ticket (TicketID, TicketStatus, SeatType, SeatNumber, HallNumber, BookingID)
+
+
+-- 1. SELECT FROM:
+SELECT * FROM Ticket;
+
+SELECT TicketID, TicketStatus, SeatType
+FROM Ticket;
+
+
+-- 2. SELECT WHERE:
+SELECT * FROM Ticket
+WHERE TicketStatus = 'Booked';
+
+SELECT * FROM Ticket
+WHERE SeatType = 'VIP' 
+AND HallNumber = 2;
+
+SELECT * FROM Ticket
+WHERE TicketStatus = 'Cancelled';
+
+
+-- 3. SELECT DISTINCT:
+SELECT DISTINCT TicketStatus
+FROM Ticket;
+
+
+-- 4. SELECT ORDER BY:
+SELECT * FROM Ticket
+ORDER BY HallNumber ASC;
+
+
+-- 5. SLECT GROUP BY:
+SELECT TicketStatus, COUNT(*) AS Total
+FROM Ticket
+GROUP BY TicketStatus;
+
+SELECT HallNumber, COUNT(*) AS TotalTickets
+FROM Ticket
+GROUP BY HallNumber;
+
+SELECT SeatType, COUNT(*) AS Total
+FROM Ticket
+GROUP BY SeatType;
+
+
+-- 6. SLECT HAVING:
+SELECT HallNumber, COUNT(*) AS TotalTickets
+FROM Ticket
+GROUP BY HallNumber
+HAVING COUNT(*) > 2;
+
+-- 7. SELECT JOIN:
+SELECT 
+    T.TicketID,
+    T.TicketStatus,
+    T.SeatType,
+    T.SeatNumber,
+    T.HallNumber,
+    S.SeatArrangement
+FROM Ticket AS T
+INNER JOIN Seats AS S 
+    ON T.SeatNumber = S.SeatNumber 
+    AND T.HallNumber = S.HallNumber;
+
+-- 8. Subquery:
+SELECT * FROM Ticket
+WHERE SeatNumber IN (
+    SELECT SeatNumber FROM Seats
+    WHERE SeatArrangement = 'Back-Right'
+);
+
+
+
+-- Check:
+
+SELECT COUNT(*) AS TotalRows FROM dbo.Ticket;
+
+
+SELECT TicketID, COUNT(*) AS Duplicates
+FROM dbo.Ticket
+GROUP BY TicketID
+HAVING COUNT(*) > 1;
+
+
+SELECT * FROM dbo.Ticket
+WHERE TicketID IS NULL
+   OR SeatType IS NULL
+   OR SeatNumber IS NULL
+   OR HallNumber IS NULL
+   OR BookingID IS NULL;
+
+
+SELECT T.*
+FROM dbo.Ticket AS T
+LEFT JOIN dbo.Seats AS S
+    ON T.SeatNumber = S.SeatNumber
+    AND T.HallNumber = S.HallNumber
+WHERE S.SeatNumber IS NULL;
