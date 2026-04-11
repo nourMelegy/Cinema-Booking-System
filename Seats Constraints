@@ -1,0 +1,54 @@
+-- Seats Constraints
+-- Seats (HallNumber, SeatNumber, SeatArrangement)
+
+
+-- 1. PRIMARY KEY:
+ALTER TABLE Seats
+ADD CONSTRAINT PK_Seats PRIMARY KEY (HallNumber, SeatNumber);
+
+
+-- 2. HallNumber must be between 1 and 10:
+ALTER TABLE Seats
+ADD CONSTRAINT CHK_Seats_HallNumber CHECK (HallNumber BETWEEN 1 AND 10);
+
+
+-- 3. SeatNumber must be positive:
+ALTER TABLE Seats
+ADD CONSTRAINT CHK_Seats_SeatNumber CHECK (SeatNumber > 0);
+
+
+-- SeatArrangement must be one of the allowed values:
+ALTER TABLE Seats
+ADD CONSTRAINT CHK_Seats_SeatArrangement CHECK (
+    SeatArrangement IN ('Front-Right', 'Front-Left', 'Front-Center','Back-Right', 'Back-Left', 'Back-Center')
+);
+
+
+-- 5. SeatArrangement defaults to 'Standard' as a default:
+ALTER TABLE Seats
+ADD CONSTRAINT DF_Seats_SeatArrangement DEFAULT 'Standard' FOR SeatArrangement;
+
+
+-- Check:
+
+SELECT 
+    c.name        AS ConstraintName,
+    c.type_desc   AS ConstraintType,
+    col.name      AS ColumnName
+FROM sys.objects c
+LEFT JOIN sys.columns col 
+    ON c.parent_object_id = col.object_id
+    AND c.type IN ('D') AND col.default_object_id = c.object_id
+WHERE c.parent_object_id = OBJECT_ID('Seats')
+  AND c.type IN ('PK', 'UQ', 'C', 'D');
+
+
+EXEC InsertSeat @HallNumber = 0, @SeatNumber = 1, @SeatArrangement = 'Standard';
+
+
+EXEC InsertSeat @HallNumber = 1, @SeatNumber = 99, @SeatArrangement = 'Broken';
+
+
+INSERT INTO Seats (HallNumber, SeatNumber)
+VALUES (2, 99);
+SELECT * FROM Seats WHERE HallNumber = 2 AND SeatNumber = 99;
