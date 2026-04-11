@@ -2,11 +2,18 @@
 
 INSERT INTO Seats VALUES 
  (1, 1, 'Front-Left'),
- (1, 2, 'Front-Center'),
- (4, 3, 'Front-Right'),
- (7, 1, 'Balcony-Left'),
- (10, 2, 'Balcony-Center');
- 
+ (6, 25, 'Front-Center'),
+ (4, 39, 'Front-Right'),
+ (7, 42, 'Back-Left'),
+ (10, 108, 'Back-Center'),
+ (5,200, 'Back-Right'),
+ (2, 56, 'Back-Left'),
+ (8, 63, 'Front-Center'),
+ (3, 50, 'Back-Right'),
+ (9, 98, 'Back-Left');
+
+
+
 ---------------------------------------------------------------------------------------------------
 
 -- Extra:
