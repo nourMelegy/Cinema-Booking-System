@@ -15,7 +15,7 @@ SELECT * FROM Seats
 WHERE HallNumber = 1;
 
 SELECT * FROM Seats
-WHERE SeatArrangement = 'Gold';
+WHERE SeatArrangement = 'Back-Center';
 
 
 -- 3. SELECT DISTINCT:
