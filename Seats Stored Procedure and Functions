@@ -1,0 +1,119 @@
+-- Seats stored procedure and functions
+-- Seats (HallNumber, SeatNumber, SeatArrangement)
+
+
+-- Stored Procedures:
+
+/*
+-- 1. GetSeatsByHall:
+CREATE PROCEDURE GetSeatsByHall
+    @HallNumber INT
+AS
+BEGIN
+    SELECT * FROM Seats
+    WHERE HallNumber = @HallNumber;
+END;
+GO
+
+-- Check:
+EXEC GetSeatsByHall @HallNumber = 1;
+*/
+
+
+/*
+-- 2. InsertSeat:
+CREATE PROCEDURE InsertSeat
+    @HallNumber      INT,
+    @SeatNumber      INT,
+    @SeatArrangement VARCHAR(50)
+AS
+BEGIN
+    INSERT INTO Seats (HallNumber, SeatNumber, SeatArrangement)
+    VALUES (@HallNumber, @SeatNumber, @SeatArrangement);
+END;
+GO
+
+-- Check:
+EXEC InsertSeat @HallNumber = 1, @SeatNumber = 0, @SeatArrangement = 'Front-Center';
+*/
+
+
+/*
+-- 3. UpdateSeatAarrangement
+CREATE PROCEDURE UpdateSeatArrangement
+    @HallNumber      INT,
+    @SeatNumber      INT,
+    @NewArrangement  VARCHAR(50)
+AS
+BEGIN
+    UPDATE Seats
+    SET SeatArrangement = @NewArrangement
+    WHERE HallNumber = @HallNumber
+      AND SeatNumber = @SeatNumber;
+END;
+GO
+
+-- Check:
+EXEC UpdateSeatArrangement @HallNumber = 1, @SeatNumber = 1, @NewArrangement = 'Back-Center';
+*/
+
+
+/*
+-- 4. DeleteSeat
+CREATE PROCEDURE DeleteSeat
+    @HallNumber INT,
+    @SeatNumber INT
+AS
+BEGIN
+    DELETE FROM Seats
+    WHERE HallNumber = @HallNumber
+      AND SeatNumber = @SeatNumber;
+END;
+GO
+
+-- Check:
+EXEC DeleteSeat @HallNumber = 1, @SeatNumber = 9;
+*/
+
+
+
+-- Stored Functions:
+
+
+/*
+-- 5. CountSeatsInHall
+CREATE FUNCTION CountSeatsInHall (@HallNumber INT)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @Total INT;
+    SELECT @Total = COUNT(*)
+    FROM Seats
+    WHERE HallNumber = @HallNumber;
+    RETURN @Total;
+END;
+GO
+
+-- Check:
+SELECT dbo.CountSeatsInHall(1) AS TotalSeats;
+*/
+
+
+/*
+-- 6. Get arrangement type of a specific seat
+CREATE FUNCTION GetSeatArrangement (@HallNumber INT, @SeatNumber INT)
+RETURNS VARCHAR(50)
+AS
+BEGIN
+    DECLARE @Arrangement VARCHAR(50);
+    SELECT @Arrangement = SeatArrangement
+    FROM Seats
+    WHERE HallNumber = @HallNumber
+      AND SeatNumber = @SeatNumber;
+    RETURN @Arrangement;
+END;
+GO
+
+-- Check:
+SELECT dbo.GetSeatArrangement(1, 1) AS SeatArrangement;
+*/
