@@ -1,0 +1,72 @@
+-- Ticket Constraints 
+-- Ticket (TicketID, TicketStatus, SeatType, SeatNumber, HallNumber, BookingID)
+
+
+-- 1. PRIMARY KEY:
+ALTER TABLE Ticket
+ADD CONSTRAINT PK_Ticket PRIMARY KEY (TicketID);
+
+
+-- 2. FOREIGN KEY:
+ALTER TABLE Ticket
+ADD CONSTRAINT FK_Ticket_Seats FOREIGN KEY (SeatNumber, HallNumber)
+    REFERENCES Seats (SeatNumber, HallNumber);
+
+
+-- 3. TicketStatus must be one of the allowed values:
+ALTER TABLE Ticket
+ADD CONSTRAINT CHK_Ticket_Status CHECK (
+    TicketStatus IN ('Booked', 'Cancelled', 'Pending')
+);
+
+
+-- 4. SeatType must be one of the allowed values:
+ALTER TABLE Ticket
+ADD CONSTRAINT CHK_Ticket_SeatType CHECK (
+    SeatType IN ('Standard', 'Gold', 'Accessible', 'VIP')
+);
+
+
+-- 5. HallNumber must be between 1 and 10:
+ALTER TABLE Ticket
+ADD CONSTRAINT CHK_Ticket_HallNumber CHECK (HallNumber BETWEEN 1 AND 10);
+
+
+-- 6. BookingID must be positive:
+ALTER TABLE Ticket
+ADD CONSTRAINT CHK_Ticket_BookingID CHECK (BookingID > 0);
+
+
+-- 7. TicketStatus is 'Pending' as a default:
+ALTER TABLE Ticket
+ADD CONSTRAINT DF_Ticket_Status DEFAULT 'Pending' FOR TicketStatus;
+
+
+
+-- Check:
+
+SELECT 
+    c.name        AS ConstraintName,
+    c.type_desc   AS ConstraintType,
+    col.name      AS ColumnName
+FROM sys.objects c
+LEFT JOIN sys.columns col 
+    ON c.parent_object_id = col.object_id
+    AND c.type IN ('D') AND col.default_object_id = c.object_id
+WHERE c.parent_object_id = OBJECT_ID('Ticket')
+  AND c.type IN ('PK', 'UQ', 'C', 'D', 'F');
+
+
+EXEC InsertTicket @TicketID = 99, @TicketStatus = 'Booked',
+                  @SeatType = 'Standard', @SeatNumber = 99,
+                  @HallNumber = 99, @BookingID = 1;
+
+
+EXEC InsertTicket @TicketID = 98, @TicketStatus = 'Unknown',
+                  @SeatType = 'Standard', @SeatNumber = 1,
+                  @HallNumber = 1, @BookingID = 1;
+
+
+INSERT INTO Ticket (TicketID, SeatType, SeatNumber, HallNumber, BookingID)
+VALUES (97, 'Standard', 1, 1, 1);
+SELECT * FROM Ticket WHERE TicketID = 97; 
