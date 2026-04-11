@@ -1,0 +1,10 @@
+TicketID	int	Unchecked
+TicketStatus	varchar(50)	Checked  CHECK (TicketStatus IN ('Booked','Cancelled','Pending')),
+SeatType	varchar(50)	Unchecked
+SeatNumber	int	Unchecked
+HallNumber	int	Unchecked
+BookingID	int	Unchecked
+
+TicketStatus IN ('Booked','Cancelled','Pending')
+FOREIGN KEY (BookingID) REFERENCES Booking(BookingID)
+FOREIGN KEY (HNumber, SeatNumber) REFERENCES Seats(HNumber, SeatNumber)
