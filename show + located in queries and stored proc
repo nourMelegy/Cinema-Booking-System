@@ -16,7 +16,12 @@ SELECT
 FROM [Show] S
 JOIN [Located_In] L ON S.show_Number = L.SHNumber
 WHERE L.HNumber = 1; 
- 
+
+
+
+
+
+/*stored procedure for schedulig*/
 
 CREATE PROCEDURE SP_Schedule_show
 @Hall_num int,
@@ -47,6 +52,40 @@ values(@SHNumber,@price,@time,@adminID)
 insert into [Located_In] (SHNumber,HNumber)
 values(@SHNumber,@Hall_num)
 PRINT'Scheduling Successsful'
+END
+END
+GO
+
+
+
+
+/*for deleting shows*/
+CREATE PROCEDURE DELETE_Scheduled_show
+@Hall_num int,
+@SHNumber int,
+@time datetime,
+@adminID int 
+AS
+BEGIN
+IF NOT EXISTS (SELECT 1 FROM [Show] WHERE show_Number = @SHNumber)
+    BEGIN
+        PRINT CAST(@SHNumber AS VARCHAR) + ' does not exist.'
+    END
+ELSE IF Not EXISTS (
+    SELECT 1 FROM [Located_In] L
+    JOIN [Show] S ON L.SHNumber = S.show_Number
+    WHERE L.HNumber = @Hall_num
+    AND S.Showtime = @time
+)
+BEGIN
+    PRINT'This time in this hall doesnt exist'
+END 
+
+ELSE  
+BEGIN 
+delete from [Located_In] WHERE SHNumber = @SHNumber
+delete from [Show] WHERE show_Number =@SHNumber
+PRINT'show removed'
 END
 END
 GO
