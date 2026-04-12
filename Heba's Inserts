@@ -11,18 +11,6 @@ insert into Show(show_Number,Price,Showtime,show_admin_id)values
 (10,300.00,'2026-04-10  11:15:00',3);
 
 
-insert into Hall
-values(1,10),
-      (2,20),
-      (3,30),
-      (4,40),
-      (5,50),
-      (6,60),
-      (7,70),
-      (8,80),
-      (9,90),
-      (10,100);
-
 insert into Located_In(HNumber,SHNumber)
 values(1,2),
        (3,7),
