@@ -5,6 +5,22 @@ CREATE TABLE [Customer] (
 
 CREATE TABLE [Show] (
     [show_Number] INT PRIMARY KEY,
+    [Price] DECIMAL(10, 2) not null,
+    CONSTRAINT CK_Show_Price_Positive CHECK ([Price] > 0),
+    [Showtime] DATETIME not null,
+    [show_admin_id] INT not null,
+    CONSTRAINT fk_show_admin_id FOREIGN KEY (show_admin_id) 
+REFERENCES admin(admin_id)
+ON DELETE NO ACTION
+);
+CREATE TABLE [Located_In](
+[HNumber] INT not null,
+[SHNumber] INT not null
+CONSTRAINT fk_HNumber FOREIGN KEY (HNumber) 
+REFERENCES Hall(HallNumber)
+ON UPDATE CASCADE,
+CONSTRAINT fk_SHNumber FOREIGN KEY (SHNumber) 
+REFERENCES Show(show_Number)
 );
 
 CREATE TABLE [payment] (
