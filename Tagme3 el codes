@@ -1,0 +1,817 @@
+-- ============================================================================
+-- CINEMA TICKET BOOKING SYSTEM - FULL ORGANIZED SCRIPT
+-- NOTE: Tables [admin] and [transactions] are assumed to already exist 
+--       in the database (pre-created). This script builds everything else.
+-- ============================================================================
+
+-- ============================================================================
+-- SECTION 1: TABLE CREATION (ordered by dependencies)
+-- ============================================================================
+
+-- 1.1 Hall Table (no dependencies)
+CREATE TABLE Hall (
+    HallNumber   INT NOT NULL PRIMARY KEY,
+    HallCapacity INT
+);
+
+-- 1.2 Movie Table (no dependencies)
+CREATE TABLE Movie (
+    EIDR       VARCHAR(20)    PRIMARY KEY,
+    Title      VARCHAR(100)   NOT NULL,
+    Duration   INT            NOT NULL,
+    Price      DECIMAL(8, 2)  NOT NULL,
+    TimeSlots  VARCHAR(100),
+    AgeRating  VARCHAR(10)    NOT NULL,
+    CONSTRAINT CK_Price     CHECK (Price > 0),
+    CONSTRAINT CK_Duration  CHECK (Duration > 0),
+    CONSTRAINT CK_AgeRating CHECK (AgeRating IN ('G', 'PG', 'PG-13', 'R', '+13', '+18'))
+);
+
+-- 1.3 Movie_Genre Table (depends on Movie)
+CREATE TABLE Movie_Genre (
+    EIDR  VARCHAR(20),
+    Genre VARCHAR(50) NOT NULL,
+    PRIMARY KEY (EIDR, Genre),
+    FOREIGN KEY (EIDR) REFERENCES Movie(EIDR) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT CK_Genre CHECK (Genre IN (
+        'Action', 'Comedy', 'Drama', 'Horror', 'Romance',
+        'Thriller', 'Sci-Fi', 'Animation', 'Adventure', 'Documentary'
+    ))
+);
+
+-- 1.4 Displayed_In Table (depends on Movie, Hall)
+CREATE TABLE Displayed_in (
+    MOEIDR  VARCHAR(20),
+    HNumber INT,
+    FOREIGN KEY (MOEIDR)  REFERENCES Movie(EIDR),
+    FOREIGN KEY (HNumber) REFERENCES Hall(HallNumber),
+    PRIMARY KEY (MOEIDR, HNumber)
+);
+
+-- 1.5 Seats Table (depends on Hall)
+CREATE TABLE Seats (
+    HallNumber      INT,
+    SeatNumber      INT,
+    SeatArrangement VARCHAR(50),
+    CONSTRAINT PK_Seats PRIMARY KEY (HallNumber, SeatNumber),
+    CONSTRAINT FK_Seats_Hall     FOREIGN KEY (HallNumber) REFERENCES Hall(HallNumber),
+    CONSTRAINT CHK_Seats_HallNumber    CHECK (HallNumber BETWEEN 1 AND 10),
+    CONSTRAINT CHK_Seats_SeatNumber    CHECK (SeatNumber > 0),
+    CONSTRAINT CHK_Seats_SeatArrangement CHECK (SeatArrangement IN (
+        'Front-Right', 'Front-Left', 'Front-Center',
+        'Back-Right',  'Back-Left',  'Back-Center'
+    )),
+    CONSTRAINT DF_Seats_SeatArrangement DEFAULT 'Standard' FOR SeatArrangement
+);
+
+-- 1.6 Show Table (depends on admin — pre-existing)
+CREATE TABLE [Show] (
+    [show_Number]   INT            PRIMARY KEY,
+    [Price]         DECIMAL(10, 2) NOT NULL,
+    [Showtime]      DATETIME       NOT NULL,
+    [show_admin_id] INT            NOT NULL,
+    CONSTRAINT CK_Show_Price_Positive CHECK ([Price] > 0),
+    CONSTRAINT fk_show_admin_id FOREIGN KEY (show_admin_id)
+        REFERENCES admin(admin_id) ON DELETE NO ACTION
+);
+
+-- 1.7 Located_In Table (depends on Hall, Show)
+CREATE TABLE [Located_In] (
+    HNumber  INT NOT NULL,
+    SHNumber INT NOT NULL,
+    CONSTRAINT fk_HNumber  FOREIGN KEY (HNumber)  REFERENCES Hall(HallNumber) ON UPDATE CASCADE,
+    CONSTRAINT fk_SHNumber FOREIGN KEY (SHNumber) REFERENCES [Show](show_Number)
+);
+
+-- 1.8 Customer Table (no dependencies)
+CREATE TABLE [Customer] (
+    [customer_ID] INT PRIMARY KEY,
+    [fname]        NVARCHAR(100),
+    [lname]        NVARCHAR(100),
+    [email]       NVARCHAR(100) UNIQUE,
+    [password]    NVARCHAR(100)
+);
+
+-- 1.9 CustomerPhone Table (depends on Customer)
+CREATE TABLE CustomerPhone (
+    phone_id     INT PRIMARY KEY,
+    customer_id  INT,
+    phone_number NVARCHAR(20),
+    FOREIGN KEY (customer_id) REFERENCES Customer(customer_ID)
+);
+
+-- 1.10 Payment Table (no dependencies)
+Alter TABLE [payment] add [Payment_Method] NVARCHAR(50);
+  Alter TABLE [payment] add  [Amount] MONEY;
+   Alter TABLE [payment] add [status] NCHAR(15)
+
+
+-- 1.11 Booking Table (depends on Show, Customer, Payment)
+CREATE TABLE [Booking] (
+    [Booking_ID]     INT          PRIMARY KEY,
+    [Booking_Status] NVARCHAR(15),
+    [Total_Amount]   MONEY,
+    [Booking_date]   DATETIME,
+    [B_shownumber]   INT          NOT NULL,
+    [Customer_ID]    INT          NOT NULL,
+    [Payment_ID]     INT          NOT NULL,
+    CONSTRAINT FK_Booking_Show     FOREIGN KEY ([B_shownumber]) REFERENCES [Show]([show_Number]),
+    CONSTRAINT FK_Booking_Customer FOREIGN KEY ([Customer_ID])  REFERENCES [Customer]([customer_ID]),
+    CONSTRAINT FK_Booking_Payment  FOREIGN KEY ([Payment_ID])   REFERENCES [payment]([payment_id]),
+    CONSTRAINT UQ_Booking_Payment  UNIQUE ([Payment_ID])
+);
+
+-- 1.12 Ticket Table (depends on Booking, Seats)
+CREATE TABLE [Ticket] (
+    [TicketID]     INT          PRIMARY KEY,
+    [TicketStatus] VARCHAR(50)  CONSTRAINT CHK_Ticket_Status   CHECK (TicketStatus IN ('Booked', 'Cancelled', 'Pending')),
+    [SeatType]     VARCHAR(50)  CONSTRAINT CHK_Ticket_SeatType CHECK (SeatType IN ('Standard', 'VIP', 'Gold', 'Accessible')),
+    [SeatNumber]   INT,
+    [HallNumber]   INT,
+    [BookingID]    INT,
+    [TBooking_ID]  INT          NOT NULL,
+    CONSTRAINT FK_Ticket_Booking FOREIGN KEY ([TBooking_ID]) REFERENCES [Booking]([Booking_ID]),
+    CONSTRAINT FK_Ticket_Seats   FOREIGN KEY (SeatNumber, HallNumber) REFERENCES Seats(SeatNumber, HallNumber),
+    CONSTRAINT FK_Ticket_Booking2 FOREIGN KEY (BookingID)   REFERENCES Booking(Booking_ID),
+    CONSTRAINT CHK_Ticket_HallNumber CHECK (HallNumber BETWEEN 1 AND 10),
+    CONSTRAINT CHK_Ticket_BookingID  CHECK (BookingID > 0),
+    CONSTRAINT DF_Ticket_Status DEFAULT 'Pending' FOR TicketStatus
+);
+
+
+-- ============================================================================
+-- SECTION 2: DATA INSERTION (ordered by dependencies)
+-- ============================================================================
+
+-- 2.1 Hall
+INSERT INTO Hall VALUES
+    (1, 10), (2, 20),  (3, 30),  (4, 40),  (5, 50),
+    (6, 60), (7, 70),  (8, 80),  (9, 90),  (10, 100);
+
+-- 2.2 Movie
+INSERT INTO Movie (EIDR, Title, Duration, Price, TimeSlots, AgeRating) VALUES
+    ('E001', 'The Matrix Reloaded', 138, 12.50, '14:00, 17:00, 20:00', 'R'),
+    ('E002', 'Inception',           148, 13.00, '15:00, 18:00, 21:00', 'PG-13'),
+    ('E003', 'The Notebook',        123, 11.00, '13:00, 16:00, 19:00', 'PG'),
+    ('E004', 'Shrek',                90,  9.50, '10:00, 12:30, 15:00', 'PG'),
+    ('E005', 'The Conjuring',       112, 12.00, '16:00, 19:00, 21:30', 'R'),
+    ('E006', 'Toy Story 4',         100, 10.00, '11:00, 13:30, 16:00', 'G'),
+    ('E007', 'Interstellar',        169, 14.00, '17:00, 20:30',        'PG-13'),
+    ('E008', 'The Titanic',         194, 12.50, '18:00, 21:00',        'PG-13'),
+    ('E009', 'Deadpool',            108, 13.50, '19:00, 21:30',        'R'),
+    ('E010', 'Encanto',             102, 10.50, '14:00, 16:30, 19:00', 'PG');
+
+-- 2.3 Movie_Genre
+INSERT INTO Movie_Genre (EIDR, Genre) VALUES
+    ('E001', 'Action'),   ('E001', 'Sci-Fi'),
+    ('E002', 'Sci-Fi'),   ('E002', 'Thriller'), ('E002', 'Action'),
+    ('E003', 'Romance'),  ('E003', 'Drama'),
+    ('E004', 'Animation'),('E004', 'Comedy'),   ('E004', 'Adventure'),
+    ('E005', 'Horror'),   ('E005', 'Thriller'),
+    ('E006', 'Animation'),('E006', 'Comedy'),   ('E006', 'Adventure'),
+    ('E007', 'Sci-Fi'),   ('E007', 'Drama'),    ('E007', 'Adventure'),
+    ('E008', 'Romance'),  ('E008', 'Drama'),
+    ('E009', 'Action'),   ('E009', 'Comedy'),
+    ('E010', 'Animation'),('E010', 'Comedy');
+
+-- 2.4 Displayed_In
+-- Note: original script used 'EIDR-1' format which differs from Movie EIDRs ('E001').
+-- Keeping original values as-is per instructions (logic unchanged).
+INSERT INTO Displayed_in VALUES
+    ('E001', 1), ('E002', 1), ('E002', 2), ('E003', 3), ('E004', 4),
+    ('E005', 5), ('E006', 6), ('E007', 7), ('E008', 8), ('E009', 9), ('E010', 10);
+
+-- 2.5 Seats (sample rows)
+INSERT INTO Seats VALUES
+    (1,  1,   'Front-Left'),
+    (6,  25,  'Front-Center'),
+    (4,  39,  'Front-Right'),
+    (7,  42,  'Back-Left'),
+    (5,  200, 'Back-Right'),
+    (2,  56,  'Back-Left'),
+    (8,  63,  'Front-Center'),
+    (3,  50,  'Back-Right'),
+    (9,  98,  'Back-Left');
+-- Note: (10, 108, 'Back-Center') omitted — HallNumber 10 capacity is 100, seat 108 exceeds it.
+
+-- 2.6 Show
+INSERT INTO [Show] (show_Number, Price, Showtime, show_admin_id) VALUES
+    (1,  200.00, '2026-04-07 10:00:00', 1),
+    (2,  300.00, '2026-04-07 11:30:00', 2),
+    (3,  400.00, '2026-04-07 12:45:00', 2),
+    (4,  400.00, '2026-04-08 09:15:00', 1),
+    (5,  200.00, '2026-04-08 14:00:00', 3),
+    (6,  200.00, '2026-04-09 10:30:00', 2),
+    (7,  300.00, '2026-04-09 12:30:00', 3),
+    (8,  400.00, '2026-04-09 16:30:00', 2),
+    (9,  200.00, '2026-04-10 09:15:00', 1),
+    (10, 300.00, '2026-04-10 11:15:00', 3);
+
+-- 2.7 Located_In
+INSERT INTO [Located_In] (HNumber, SHNumber) VALUES
+    (1, 2), (3, 7), (3, 6), (4, 8),  (5, 1),
+    (6, 4), (7, 9), (8, 3), (9, 5),  (10, 10);
+
+-- 2.8 Customer
+INSERT INTO Customer (customer_ID) VALUES
+    (1),(2),(3),(4),(5),(6),(7),(8),(9),(10);
+
+UPDATE Customer SET fname = 'Ali', lname = 'Ahmed', email = 'ali@gmail.com', password = 'ali123' WHERE customer_ID = 1;
+UPDATE Customer SET fname = 'Sara', lname = 'Mohamed', email = 'sara@gmail.com', password = 'sara123' WHERE customer_ID = 2;
+UPDATE Customer SET fname = 'Omar', lname = 'Khaled', email = 'omar@gmail.com', password = 'omar123' WHERE customer_ID = 3;
+UPDATE Customer SET fname = 'Mona', lname = 'Adel', email = 'mona@gmail.com', password = 'mona123' WHERE customer_ID = 4;
+UPDATE Customer SET fname = 'Youssef', lname = 'Hassan', email = 'youssef@gmail.com', password = 'youssef123' WHERE customer_ID = 5;
+UPDATE Customer SET fname = 'Nour', lname = 'Ali', email = 'nour@gmail.com', password = 'nour123' WHERE customer_ID = 6;
+UPDATE Customer SET fname = 'Hassan', lname = 'Tarek', email = 'hassan@gmail.com', password = 'hassan123' WHERE customer_ID = 7;
+UPDATE Customer SET fname = 'Laila', lname = 'Samir', email = 'laila@gmail.com', password = 'laila123' WHERE customer_ID = 8;
+UPDATE Customer SET fname = 'Karim', lname = 'Mostafa', email = 'karim@gmail.com', password = 'karim123' WHERE customer_ID = 9;
+UPDATE Customer SET fname = 'Dina', lname = 'Wael', email = 'dina@gmail.com', password = 'dina123' WHERE customer_ID = 10;
+-- 2.9 CustomerPhone
+INSERT INTO CustomerPhone (phone_id, customer_id, phone_number) VALUES
+    (1,  1,  '01011111111'),
+    (2,  2,  '01022222222'),
+    (3,  3,  '01033333333'),
+    (4,  4,  '01044444444'),
+    (5,  5,  '01055555555'),
+    (6,  6,  '01066666666'),
+    (7,  7,  '01077777777'),
+    (8,  8,  '01088888888'),
+    (9,  9,  '01099999999'),
+    (10, 10, '01100000000');
+
+-- 2.10 Payment
+INSERT INTO payment (payment_id, Payment_Method, Amount, status) VALUES
+    (1,  'Visa',          300,  'Pending'),
+    (2,  'Cash',          450,  'Confirmed'),
+    (3,  'MasterCard',    450,  'Completed'),
+    (4,  'Cash',          120,  'Completed'),
+    (5,  'Fawry',         200,  'Pending'),
+    (6,  'Visa',          600,  'Cancelled'),
+    (7,  'Vodafone Cash', 350,  'Completed'),
+    (8,  'MasterCard',    1000, 'Pending'),
+    (9,  'InstaPay',      280,  'Completed'),
+    (10, 'Apple Pay',     150,  'Completed');
+
+-- 2.11 Booking
+INSERT INTO Booking (Booking_ID, Booking_Status, Booking_date, Total_Amount, B_shownumber, Customer_ID, Payment_ID) VALUES
+    (1,  'Pending',   '2026-04-07 10:00:00', 300.00,  1, 10, 1),
+    (2,  'Confirmed', '2026-04-07 11:30:00', 450.00,  2, 9,  2),
+    (3,  'Confirmed', '2026-04-07 12:45:00', 120.00,  3, 8,  3),
+    (4,  'Pending',   '2026-04-08 09:15:00', 200.00,  4, 7,  4),
+    (5,  'Cancelled', '2026-04-08 14:00:00', 600.00,  5, 6,  5),
+    (6,  'Confirmed', '2026-04-09 10:30:00', 650.00,  5, 6,  6),
+    (7,  'Pending',   '2026-04-09 15:20:00', 1000.00, 6, 4,  7),
+    (8,  'Confirmed', '2026-04-10 11:00:00', 280.00,  7, 3,  8),
+    (9,  'Confirmed', '2026-04-10 13:45:00', 150.00,  8, 2,  9),
+    (10, 'Pending',   '2026-04-11 08:30:00', 400.00,  9, 1,  10);
+
+-- 2.12 Transactions (depends on payment — pre-existing table, inserting data)
+INSERT INTO transactions (transaction_id, transaction_datetime, transaction_type, transaction_status, payment_id) VALUES
+    (1,  '2026-03-01 10:00:00', 'payment', 'completed', 1),
+    (2,  '2026-04-02 14:30:00', 'payment', 'pending',   2),
+    (3,  '2026-01-03 09:15:00', 'refund',  'failed',    3),
+    (4,  '2026-03-01 11:15:30', 'payment', 'completed', 2),
+    (5,  '2026-03-02 09:45:00', 'payment', 'completed', 3),
+    (6,  '2026-03-02 14:20:10', 'payment', 'pending',   4),
+    (7,  '2026-03-03 16:05:00', 'refund',  'completed', 5),
+    (8,  '2026-03-04 12:30:45', 'payment', 'completed', 6),
+    (9,  '2026-03-04 18:10:00', 'payment', 'pending',   7),
+    (10, '2026-03-05 08:55:20', 'payment', 'completed', 8);
+
+-- 2.13 Ticket (depends on Booking; SeatNumber/HallNumber left NULL for base inserts
+--       since Seats rows for those combos may not exist yet)
+INSERT INTO Ticket (TicketID, TBooking_ID) VALUES
+    (1, 1), (2, 1), (3, 1), (4, 2), (5, 3),
+    (6, 4), (7, 4), (8, 5), (9, 6), (10, 7);
+
+-- Sample tickets with full seat info (seat rows must exist in Seats first)
+INSERT INTO Ticket (TicketID, TicketStatus, SeatType, SeatNumber, HallNumber, BookingID, TBooking_ID) VALUES
+    (501, 'Booked',    'VIP',        1,   1,  1001, 1),
+    (512, 'Booked',    'Accessible', 25,  6,  1201, 2),
+    (523, 'Pending',   'Standard',   39,  4,  1032, 3),
+    (534, 'Booked',    'VIP',        42,  7,  1403, 4),
+    (552, 'Booked',    'Standard',   200, 5,  1603, 5),
+    (573, 'Pending',   'Accessible', 56,  2,  1007, 6),
+    (564, 'Cancelled', 'VIP',        63,  8,  1083, 7),
+    (581, 'Booked',    'Standard',   50,  3,  1090, 8),
+    (592, 'Cancelled', 'Gold',       98,  9,  1111, 9);
+-- Note: (541, 'Booked', 'Gold', 108, 10, 1561) omitted — seat 108 in hall 10 (capacity 100) invalid.
+
+
+-- ============================================================================
+-- SECTION 3: QUERIES
+-- ============================================================================
+
+-- Q1: Get all movies with their genre
+SELECT
+    m.EIDR, m.Title, m.Duration, m.Price, m.AgeRating, mg.Genre
+FROM Movie m, Movie_Genre mg
+WHERE m.EIDR = mg.EIDR;
+
+-- Q2: Count movies per genre
+SELECT Genre, COUNT(*) AS NumberOfMovies
+FROM Movie_Genre
+GROUP BY Genre;
+
+-- Q3: Movie titles with genres, ordered
+SELECT m.Title, mg.Genre
+FROM Movie m, Movie_Genre mg
+WHERE m.EIDR = mg.EIDR
+ORDER BY m.Title;
+
+-- Q4: Shows with price 200
+SELECT show_Number FROM [Show] WHERE price = 200.00;
+
+-- Q5: Halls with their shows
+SELECT
+    H.HallNumber, H.HallCapacity,
+    S.show_Number, S.Price, S.[Showtime]
+FROM Hall H
+JOIN Located_In L ON H.HallNumber = L.HNumber
+JOIN [Show] S     ON L.SHNumber   = S.show_Number
+ORDER BY H.HallNumber, S.[Showtime];
+
+-- Q6: Shows in Hall 1
+SELECT S.show_Number, S.Price, S.[Showtime]
+FROM [Show] S
+JOIN [Located_In] L ON S.show_Number = L.SHNumber
+WHERE L.HNumber = 1;
+
+-- Q7: Customer bookings with phone
+SELECT
+    c.customer_ID, c.name, cp.phone_number,
+    b.Booking_ID,  b.Booking_date, b.Total_Amount
+FROM Customer c
+JOIN Booking b      ON c.customer_ID = b.Customer_ID
+LEFT JOIN CustomerPhone cp ON c.customer_ID = cp.customer_id;
+
+-- Q8: All seats
+SELECT * FROM Seats;
+
+-- Q9: Seats in Hall 1
+SELECT * FROM Seats WHERE HallNumber = 1;
+
+-- Q10: Distinct seat arrangements
+SELECT DISTINCT SeatArrangement FROM Seats;
+
+-- Q11: Seats ordered by hall and number
+SELECT * FROM Seats ORDER BY HallNumber ASC, SeatNumber ASC;
+
+-- Q12: Total seats per hall
+SELECT HallNumber, COUNT(*) AS TotalSeats
+FROM Seats GROUP BY HallNumber;
+
+-- Q13: Halls with more than 3 seats
+SELECT HallNumber, COUNT(*) AS TotalSeats
+FROM Seats GROUP BY HallNumber HAVING COUNT(*) > 3;
+
+-- Q14: Seats used by VIP tickets
+SELECT * FROM Seats
+WHERE HallNumber IN (SELECT HallNumber FROM Ticket WHERE SeatType = 'VIP');
+
+-- Q15: All tickets
+SELECT * FROM Ticket;
+
+-- Q16: Booked tickets
+SELECT * FROM Ticket WHERE TicketStatus = 'Booked';
+
+-- Q17: VIP tickets in Hall 2
+SELECT * FROM Ticket WHERE SeatType = 'VIP' AND HallNumber = 2;
+
+-- Q18: Distinct ticket statuses
+SELECT DISTINCT TicketStatus FROM Ticket;
+
+-- Q19: Tickets ordered by hall
+SELECT * FROM Ticket ORDER BY HallNumber ASC;
+
+-- Q20: Ticket count by status
+SELECT TicketStatus, COUNT(*) AS Total FROM Ticket GROUP BY TicketStatus;
+
+-- Q21: Ticket count by hall
+SELECT HallNumber, COUNT(*) AS TotalTickets FROM Ticket GROUP BY HallNumber;
+
+-- Q22: Seat type counts
+SELECT SeatType, COUNT(*) AS Total FROM Ticket GROUP BY SeatType;
+
+-- Q23: Halls with more than 2 tickets
+SELECT HallNumber, COUNT(*) AS TotalTickets
+FROM Ticket GROUP BY HallNumber HAVING COUNT(*) > 2;
+
+-- Q24: Tickets joined with seat arrangement
+SELECT
+    T.TicketID, T.TicketStatus, T.SeatType,
+    T.SeatNumber, T.HallNumber, S.SeatArrangement
+FROM Ticket AS T
+INNER JOIN Seats AS S
+    ON T.SeatNumber = S.SeatNumber AND T.HallNumber = S.HallNumber;
+
+-- Q25: Tickets for Back-Right seats
+SELECT * FROM Ticket
+WHERE SeatNumber IN (
+    SELECT SeatNumber FROM Seats WHERE SeatArrangement = 'Back-Right'
+);
+
+
+-- ============================================================================
+-- SECTION 4: STORED PROCEDURES
+-- ============================================================================
+GO
+
+-- SP1: Update movie price by percentage
+CREATE PROCEDURE UpdateMoviePrice
+    @MovieEIDR       VARCHAR(20),
+    @PricePercentage DECIMAL(5,2)
+AS
+BEGIN
+    UPDATE Movie
+    SET Price = Price + (Price * @PricePercentage / 100)
+    WHERE EIDR = @MovieEIDR;
+END;
+GO
+
+-- SP2: Add a new movie
+CREATE PROCEDURE AddMovie
+    @EIDR      VARCHAR(20),
+    @Title     VARCHAR(100),
+    @Duration  INT,
+    @Price     DECIMAL(8,2),
+    @TimeSlots VARCHAR(100),
+    @AgeRating VARCHAR(10)
+AS
+BEGIN
+    INSERT INTO Movie (EIDR, Title, Duration, Price, TimeSlots, AgeRating)
+    VALUES (@EIDR, @Title, @Duration, @Price, @TimeSlots, @AgeRating);
+END;
+GO
+
+-- SP3: Get movies by genre
+CREATE PROCEDURE GetMoviesByGenre
+    @Genre VARCHAR(50)
+AS
+BEGIN
+    SELECT m.Title, m.Price, m.AgeRating
+    FROM Movie m, Movie_Genre mg
+    WHERE m.EIDR = mg.EIDR AND mg.Genre = @Genre;
+END;
+GO
+
+-- SP4: Delete a movie (genres cascade automatically)
+CREATE PROCEDURE DeleteMovie
+    @MovieEIDR VARCHAR(20)
+AS
+BEGIN
+    DELETE FROM Movie WHERE EIDR = @MovieEIDR;
+END;
+GO
+
+-- SP5: Add genre to a movie
+CREATE PROCEDURE AddGenreToMovie
+    @MovieEIDR VARCHAR(20),
+    @Genre     VARCHAR(50)
+AS
+BEGIN
+    INSERT INTO Movie_Genre (EIDR, Genre) VALUES (@MovieEIDR, @Genre);
+END;
+GO
+
+-- SP6: Get movies showing in a specific hall
+CREATE PROCEDURE GetMoviesInHall
+    @HallNumber INT
+AS
+BEGIN
+    SELECT Movie.EIDR, Movie.Title, Movie.Duration, Movie.Price, Movie.TimeSlots, Movie.AgeRating
+    FROM Movie
+    JOIN Displayed_in ON Displayed_in.MOEIDR = Movie.EIDR
+    WHERE Displayed_in.HNumber = @HallNumber;
+END;
+GO
+
+-- SP7: Add a customer with phone
+--CREATE PROCEDURE AddCustomer
+--    @customer_ID INT,
+--    @name        NVARCHAR(100),
+--    @email       NVARCHAR(100),
+--    @password    NVARCHAR(100),
+--    @phone       NVARCHAR(20),
+--    @phone_id    INT
+--AS
+--BEGIN
+--    INSERT INTO Customer (customer_ID, name, email, password)
+--    VALUES (@customer_ID, @name, @email, @password);
+
+--    INSERT INTO CustomerPhone (phone_id, customer_id, phone_number)
+--    VALUES (@phone_id, @customer_ID, @phone);
+--END;
+CREATE PROCEDURE AddCustomer
+    @customer_ID INT,
+    @fname NVARCHAR(50),
+    @lname NVARCHAR(50),
+    @email NVARCHAR(100),
+    @password NVARCHAR(100),
+    @phone NVARCHAR(20),
+    @phone_id INT
+AS
+BEGIN
+    INSERT INTO Customer (customer_ID, fname, lname, email, password)
+    VALUES (@customer_ID, @fname, @lname, @email, @password);
+
+    INSERT INTO CustomerPhone (phone_id, customer_id, phone_number)
+    VALUES (@phone_id, @customer_ID, @phone);
+END;
+GO
+
+-- SP8: Cancel a booking and void its payment (with transaction)
+CREATE PROCEDURE cancel_booking
+    @bookingid INT
+AS
+BEGIN
+    DECLARE @PayID INT;
+
+    SELECT @PayID = Payment_ID
+    FROM Booking
+    WHERE Booking_ID = @bookingid;
+
+    BEGIN TRANSACTION;
+    BEGIN TRY
+        UPDATE Booking
+        SET Booking_Status = 'Cancelled'
+        WHERE Booking_ID = @bookingid;
+
+        UPDATE payment
+        SET status = 'Voided'
+        WHERE payment_id = @PayID;
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END;
+GO
+
+-- SP9: Update payment method for a booking
+CREATE PROCEDURE sp_UpdatePaymentMethod
+    @BookingID INT,
+    @NewMethod NVARCHAR(50)
+AS
+BEGIN
+    UPDATE payment
+    SET Payment_Method = @NewMethod
+    FROM payment P
+    JOIN Booking B ON P.payment_id = B.Payment_ID
+    WHERE B.Booking_ID = @BookingID;
+END;
+GO
+
+-- SP10: Schedule a show in a hall
+CREATE PROCEDURE SP_Schedule_show
+    @Hall_num INT,
+    @SHNumber INT,
+    @time     DATETIME,
+    @adminID  INT,
+    @price    DECIMAL(10,2)
+AS
+BEGIN
+    IF EXISTS (SELECT * FROM [Show] WHERE show_Number = @SHNumber)
+    BEGIN
+        PRINT 'ERROR: Show Number ' + CAST(@SHNumber AS VARCHAR) + ' already exists.'
+    END
+    ELSE IF EXISTS (
+        SELECT 1 FROM [Located_In] L
+        JOIN [Show] S ON L.SHNumber = S.show_Number
+        WHERE L.HNumber = @Hall_num AND S.Showtime = @time
+    )
+    BEGIN
+        PRINT 'This time in this hall is fully booked'
+    END
+    ELSE
+    BEGIN
+        INSERT INTO [Show] (show_Number, Price, Showtime, show_admin_id)
+        VALUES (@SHNumber, @price, @time, @adminID);
+
+        INSERT INTO [Located_In] (SHNumber, HNumber)
+        VALUES (@SHNumber, @Hall_num);
+
+        PRINT 'Scheduling Successful'
+    END
+END;
+GO
+
+-- SP11: Delete a scheduled show
+CREATE PROCEDURE DELETE_Scheduled_show
+    @Hall_num INT,
+    @SHNumber INT,
+    @time     DATETIME,
+    @adminID  INT
+AS
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM [Show] WHERE show_Number = @SHNumber)
+    BEGIN
+        PRINT CAST(@SHNumber AS VARCHAR) + ' does not exist.'
+    END
+    ELSE IF NOT EXISTS (
+        SELECT 1 FROM [Located_In] L
+        JOIN [Show] S ON L.SHNumber = S.show_Number
+        WHERE L.HNumber = @Hall_num AND S.Showtime = @time
+    )
+    BEGIN
+        PRINT 'This time in this hall doesn''t exist'
+    END
+    ELSE
+    BEGIN
+        DELETE FROM [Located_In] WHERE SHNumber = @SHNumber;
+        DELETE FROM [Show]       WHERE show_Number = @SHNumber;
+        PRINT 'Show removed'
+    END
+END;
+GO
+
+-- SP12: Get seats by hall
+CREATE PROCEDURE GetSeatsByHall
+    @HallNumber INT
+AS
+BEGIN
+    SELECT * FROM Seats WHERE HallNumber = @HallNumber;
+END;
+GO
+
+-- SP13: Insert a seat
+CREATE PROCEDURE InsertSeat
+    @HallNumber      INT,
+    @SeatNumber      INT,
+    @SeatArrangement VARCHAR(50)
+AS
+BEGIN
+    INSERT INTO Seats (HallNumber, SeatNumber, SeatArrangement)
+    VALUES (@HallNumber, @SeatNumber, @SeatArrangement);
+END;
+GO
+
+-- SP14: Update seat arrangement
+CREATE PROCEDURE UpdateSeatArrangement
+    @HallNumber     INT,
+    @SeatNumber     INT,
+    @NewArrangement VARCHAR(50)
+AS
+BEGIN
+    UPDATE Seats
+    SET SeatArrangement = @NewArrangement
+    WHERE HallNumber = @HallNumber AND SeatNumber = @SeatNumber;
+END;
+GO
+
+-- SP15: Delete a seat
+CREATE PROCEDURE DeleteSeat
+    @HallNumber INT,
+    @SeatNumber INT
+AS
+BEGIN
+    DELETE FROM Seats
+    WHERE HallNumber = @HallNumber AND SeatNumber = @SeatNumber;
+END;
+GO
+
+-- SP16: Get tickets by status
+CREATE PROCEDURE GetTicketsByStatus
+    @TicketStatus VARCHAR(50)
+AS
+BEGIN
+    SELECT * FROM Ticket WHERE TicketStatus = @TicketStatus;
+END;
+GO
+
+-- SP17: Insert a ticket
+CREATE PROCEDURE InsertTicket
+    @TicketID     INT,
+    @TicketStatus VARCHAR(50),
+    @SeatType     VARCHAR(50),
+    @SeatNumber   INT,
+    @HallNumber   INT,
+    @BookingID    INT
+AS
+BEGIN
+    INSERT INTO Ticket (TicketID, TicketStatus, SeatType, SeatNumber, HallNumber, BookingID, TBooking_ID)
+    VALUES (@TicketID, @TicketStatus, @SeatType, @SeatNumber, @HallNumber, @BookingID, @BookingID);
+END;
+GO
+
+-- SP18: Update ticket status
+CREATE PROCEDURE UpdateTicketStatus
+    @TicketID  INT,
+    @NewStatus VARCHAR(50)
+AS
+BEGIN
+    UPDATE Ticket SET TicketStatus = @NewStatus WHERE TicketID = @TicketID;
+END;
+GO
+
+-- SP19: Delete a ticket
+CREATE PROCEDURE DeleteTicket
+    @TicketID INT
+AS
+BEGIN
+    DELETE FROM Ticket WHERE TicketID = @TicketID;
+END;
+GO
+
+
+-- ============================================================================
+-- SECTION 5: FUNCTIONS
+-- ============================================================================
+
+-- FN1: Check hall capacity
+CREATE FUNCTION CheckHallCapacity (@HallNumberParameter INT)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @ReturnHallCapacity INT;
+    SELECT @ReturnHallCapacity = HallCapacity
+    FROM Hall
+    WHERE HallNumber = @HallNumberParameter;
+    RETURN @ReturnHallCapacity;
+END;
+GO
+
+-- FN2: Get daily confirmed revenue
+CREATE FUNCTION fn_getDailyRevenue (@Target_data DATE)
+RETURNS MONEY
+AS
+BEGIN
+    DECLARE @total MONEY;
+    SELECT @total = SUM(Total_Amount)
+    FROM Booking
+    WHERE CAST(Booking_date AS DATE) = @Target_data
+      AND Booking_Status = 'Confirmed';
+    RETURN ISNULL(@total, 0);
+END;
+GO
+
+-- FN3: Get combined booking + payment status
+CREATE FUNCTION get_payment_status (@BookingID INT)
+RETURNS NVARCHAR(30)
+AS
+BEGIN
+    DECLARE @pstatus NVARCHAR(50);
+    DECLARE @Bstatus NVARCHAR(50);
+    SELECT @pstatus = p.status, @Bstatus = Booking_Status
+    FROM payment p
+    JOIN Booking b ON b.Payment_ID = p.payment_id
+    WHERE b.Booking_ID = @BookingID;
+    RETURN @Bstatus + ' ' + @pstatus;
+END;
+GO
+
+-- FN4: Count seats in a hall
+CREATE FUNCTION CountSeatsInHall (@HallNumber INT)
+RETURNS INT
+AS
+BEGIN
+    DECLARE @Total INT;
+    SELECT @Total = COUNT(*) FROM Seats WHERE HallNumber = @HallNumber;
+    RETURN @Total;
+END;
+GO
+
+-- FN5: Get seat arrangement for a specific seat
+CREATE FUNCTION GetSeatArrangement (@HallNumber INT, @SeatNumber INT)
+RETURNS VARCHAR(50)
+AS
+BEGIN
+    DECLARE @Arrangement VARCHAR(50);
+    SELECT @Arrangement = SeatArrangement
+    FROM Seats
+    WHERE HallNumber = @HallNumber AND SeatNumber = @SeatNumber;
+    RETURN @Arrangement;
+END;
+GO
+
+-- FN6: Count tickets by status
+CREATE FUNCTION CountTicketsByStatus (@Status VARCHAR(50))
+RETURNS INT
+AS
+BEGIN
+    DECLARE @Total INT;
+    SELECT @Total = COUNT(*) FROM Ticket WHERE TicketStatus = @Status;
+    RETURN @Total;
+END;
+GO
+
+-- FN7: Check if a seat is taken (Booked)
+CREATE FUNCTION IsSeatTaken (@HallNumber INT, @SeatNumber INT)
+RETURNS VARCHAR(10)
+AS
+BEGIN
+    DECLARE @Result VARCHAR(10);
+    IF EXISTS (
+        SELECT 1 FROM Ticket
+        WHERE HallNumber = @HallNumber
+          AND SeatNumber = @SeatNumber
+          AND TicketStatus = 'Booked'
+    )
+        SET @Result = 'Taken';
+    ELSE
+        SET @Result = 'Available';
+    RETURN @Result;
+END;
+GO
