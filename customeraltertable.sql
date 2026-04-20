@@ -1,5 +1,6 @@
 ALTER TABLE Customer
 ADD 
-    name NVARCHAR(100),
-    email NVARCHAR(100) UNIQUE,
+    first_name NVARCHAR(50),
+    last_name NVARCHAR(50),
+    email NVARCHAR(100) unique,
     password NVARCHAR(100);
