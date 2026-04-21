@@ -24,14 +24,14 @@ REFERENCES Show(show_Number)
 );
 
 CREATE TABLE [payment] (
-    [payment_id] INT PRIMARY KEY,
+    [payment_id] INT IDENTITY(1,1) PRIMARY KEY,
     [Payment_Method] NVARCHAR(50),
     [Amount] MONEY,
     [status] NCHAR(15)
 );
 
 CREATE TABLE [Booking] (
-    [Booking_ID] INT PRIMARY KEY,
+    [Booking_ID] INT IDENTITY(1,1) PRIMARY KEY,
     [Booking_Status] NVARCHAR(15),
     [Total_Amount] MONEY,
     [Booking_date] DATETIME,
