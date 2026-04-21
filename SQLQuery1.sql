@@ -1,16 +1,51 @@
 --Creation of hall table 
 create table Hall (
 HallNumber int NOT NULL primary key,
-HallCapacity int );
+HallCapacity int NOT NULL CHECK (HallCapacity >0)
+);
+
+
+------------------------------------------------------------------------------------------------------------
+-- From Fatema code 
+CREATE TABLE Movie (
+    EIDR       VARCHAR(20)    PRIMARY KEY,
+    Title      VARCHAR(100)   NOT NULL,
+    Duration   INT            NOT NULL,
+    Price      DECIMAL(8, 2)  NOT NULL,
+    TimeSlots  VARCHAR(100),
+    AgeRating  VARCHAR(10)    NOT NULL,
+    CONSTRAINT CK_Price     CHECK (Price > 0),
+    CONSTRAINT CK_Duration  CHECK (Duration > 0),
+    CONSTRAINT CK_AgeRating CHECK (AgeRating IN ('G', 'PG', 'PG-13', 'R', '+13', '+18'))
+);
+------------------------------------------------------------------------------------------------------------
 
 --creation of displayed-in
 create table Displayed_in (
-MOEIDR VARCHAR(20),
-HNumber int,
+MOEIDR VARCHAR(20) NOT NULL,
+HNumber int NOT NULL,
 foreign key (MOEIDR) References Movie (EIDR),
 foreign key (HNumber) References Hall (HallNumber),
 primary key(MOEIDR,HNumber));
 
+
+
+
+
+------------------------------------------------------------------------------------------------------------
+--Fatema part
+Insert into Movie values
+('EIDR-1',  'The Beginning',    120, 12.99, '10:00 AM', 'PG'),
+('EIDR-2',  'Dark Waters',      95,  8.99,  '12:00 PM', 'PG-13'),
+('EIDR-3',  'Lost in Time',     110, 10.99, '02:00 PM', 'G'),
+('EIDR-4',  'The Last Stand',   130, 14.99, '04:00 PM', 'R'),
+('EIDR-5',  'Rising Sun',       105, 9.99,  '06:00 PM', 'PG'),
+('EIDR-6',  'Midnight Run',     88,  7.99,  '08:00 PM', 'PG-13'),
+('EIDR-7',  'Shadow Falls',     115, 11.99, '10:00 AM', '+13'),
+('EIDR-8',  'Broken Wings',     100, 9.99,  '12:00 PM', '+18'),
+('EIDR-9',  'Edge of Tomorrow', 125, 13.99, '02:00 PM', 'PG-13'),
+('EIDR-10', 'Final Horizon',    140, 15.99, '04:00 PM', 'R');
+------------------------------------------------------------------------------------------------------------
 
 --Insertion into halls table 
 Insert into Hall
@@ -41,15 +76,23 @@ values('EIDR-1', 1),
       ('EIDR-10',10);
 
 
+
+
 --Query part
-create procedure GetMoviesInHall
+CREATE PROCEDURE GetMoviesInHall
     @HallNumber int
 AS
 BEGIN
-select Movie.EIDR, Movie.Title, Movie.Duration, Movie.Price, Movie.TimeSlots, Movie.AgeRating
-from Movie
-join Displayed_in on Displayed_in.MOEIDR = movie.EIDR 
-where Displayed_in.HNumber = @HallNumber
+    IF NOT EXISTS (SELECT 1 FROM Hall WHERE HallNumber = @HallNumber)
+    BEGIN
+        RAISERROR('Hall not found!', 16, 1);
+        RETURN;
+    END
+
+    SELECT Movie.EIDR, Movie.Title, Movie.Duration, Movie.Price, Movie.TimeSlots, Movie.AgeRating
+    FROM Movie
+    JOIN Displayed_in ON Displayed_in.MOEIDR = Movie.EIDR
+    WHERE Displayed_in.HNumber = @HallNumber
 END;
 
 --To call
@@ -62,6 +105,9 @@ create Function CheckHallCapacity
     Returns int
 AS
 BEGIN
+IF NOT EXISTS (SELECT 1 FROM Hall WHERE HallNumber = @HallNumberParameter)
+        RETURN -1; 
+
 Declare @ReturnHallCapacity int
 select @ReturnHallCapacity = HallCapacity
 from Hall
@@ -71,3 +117,40 @@ END;
 
 --To call 
 select CheckHallCapacity(1) AS CapacityForRequiredHall; --1 is for example
+
+
+--CRUD HALL PART 
+
+--Update hall 
+CREATE PROCEDURE UpdateHall
+    @HallNumber INT,
+    @HallCapacity INT
+AS
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM Hall WHERE HallNumber = @HallNumber)
+    BEGIN
+        RAISERROR('Hall not found!', 16, 1);
+        RETURN;
+    END
+
+    UPDATE Hall
+    SET HallCapacity = @HallCapacity
+    WHERE HallNumber = @HallNumber;
+END;
+
+--Delete hall
+CREATE PROCEDURE DeleteHall
+    @HallNumber INT
+AS
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM Hall WHERE HallNumber = @HallNumber)
+    BEGIN
+        RAISERROR('Hall not found!', 16, 1);
+        RETURN;
+    END
+
+    DELETE FROM Hall
+    WHERE HallNumber = @HallNumber;
+END;
+
+
