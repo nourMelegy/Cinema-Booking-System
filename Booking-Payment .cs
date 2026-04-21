@@ -31,55 +31,55 @@ namespace project_gui
         }
 
         private void btnConfirm_Click(object sender, EventArgs e)
-        {
-            if (cmbMethod.SelectedIndex == -1 || cmbStatus.SelectedIndex == -1)
-            {
-                MessageBox.Show("Please select a method and status.");
-                return;
-            }
+ {
+     if (cmbMethod.SelectedIndex == -1 || cmbStatus.SelectedIndex == -1)
+     {
+         MessageBox.Show("Please select a method and status.");
+         return;
+     }
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                try
-                {
-                    conn.Open();
+     using (SqlConnection conn = new SqlConnection(connectionString))
+     {
+         try
+         {
+             conn.Open();
 
-                    //  Automatic ID Generation
-                  
-                    SqlCommand getIdCmd = new SqlCommand("SELECT ISNULL(MAX(payment_id), 0) + 1 FROM payment", conn);
-                    int newPaymentId = Convert.ToInt32(getIdCmd.ExecuteScalar());
+             string insertPayment = @"INSERT INTO payment (Payment_Method, Amount, status) VALUES (@method, @amount, 'Completed');SELECT SCOPE_IDENTITY();";
 
-                    SqlCommand getBookingIdCmd = new SqlCommand("SELECT ISNULL(MAX(Booking_ID), 0) + 1 FROM Booking", conn);
-                    int newBookingId = Convert.ToInt32(getBookingIdCmd.ExecuteScalar());
+             SqlCommand cmdPay = new SqlCommand(insertPayment, conn);
+             cmdPay.Parameters.AddWithValue("@method", cmbMethod.Text);
+             cmdPay.Parameters.AddWithValue("@amount", _totalAmount);
 
-                    // Insert into Payment Table 
-                    string insertPayment = "INSERT INTO payment (payment_id, Payment_Method, Amount, status) VALUES (@payId, @method, @amount, 'Completed')";
-                    SqlCommand cmdPay = new SqlCommand(insertPayment, conn);
-                    cmdPay.Parameters.AddWithValue("@payId", newPaymentId);
-                    cmdPay.Parameters.AddWithValue("@method", cmbMethod.Text);
-                    cmdPay.Parameters.AddWithValue("@amount", _totalAmount);
-                    cmdPay.ExecuteNonQuery();
+             // Execute and capture the new Payment ID
+             int newPaymentId = Convert.ToInt32(cmdPay.ExecuteScalar());
 
-                    //  Insert into Booking Table Second 
-                    string insertBooking = "INSERT INTO Booking (Booking_ID, Booking_Status, Total_Amount, Booking_date, B_shownumber, Customer_ID, Payment_ID) VALUES (@bookId, @bStatus, @amount, GETDATE(), @showId, @custId, @payId)";
-                    SqlCommand cmdBook = new SqlCommand(insertBooking, conn);
-                    cmdBook.Parameters.AddWithValue("@bookId", newBookingId);
-                    cmdBook.Parameters.AddWithValue("@bStatus", cmbStatus.Text);
-                    cmdBook.Parameters.AddWithValue("@amount", _totalAmount);
-                    cmdBook.Parameters.AddWithValue("@showId", _showID);
-                    cmdBook.Parameters.AddWithValue("@custId", _customerID);
-                    cmdBook.Parameters.AddWithValue("@payId", newPaymentId); 
-                    cmdBook.ExecuteNonQuery();
 
-                    MessageBox.Show($"Booking Successful! \nYour Booking ID is: {newBookingId}");
-                    this.Close(); // Closes the payment window
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Database Error: " + ex.Message);
-                }
-            }
-        }
+             string insertBooking = @"INSERT INTO Booking (Booking_Status, Total_Amount, Booking_date, B_shownumber, Customer_ID, Payment_ID)  VALUES (@bStatus, @amount, GETDATE(), @showId, @custId, @payId);
+                            SELECT SCOPE_IDENTITY();";
+
+             SqlCommand cmdBook = new SqlCommand(insertBooking, conn);
+             cmdBook.Parameters.AddWithValue("@bStatus", cmbStatus.Text);
+             cmdBook.Parameters.AddWithValue("@amount", _totalAmount);
+             cmdBook.Parameters.AddWithValue("@showId", _showID);
+             cmdBook.Parameters.AddWithValue("@custId", _customerID);
+             cmdBook.Parameters.AddWithValue("@payId", newPaymentId); // This links the two tables!
+
+             // Execute and capture the new Booking ID
+             int newBookingId = Convert.ToInt32(cmdBook.ExecuteScalar());
+
+             MessageBox.Show($"Booking Successful!\nYour Booking ID is: {newBookingId}\nPayment ID linked: {newPaymentId}");
+
+            
+             this.DialogResult = DialogResult.OK;
+             this.Close();
+         }
+         catch (Exception ex)
+         {
+             // This will now show the exact column causing trouble if there's a typo
+             MessageBox.Show("Database Error: " + ex.Message);
+         }
+     }
+ }
     }
 }
 
@@ -91,17 +91,18 @@ namespace project_gui
 
 
 -- booking .cs
+using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace project_gui
 {
     public partial class booking : Form
     {
-       
+
         string connectionString = @"Data Source=localhost\SQLEXPRESS;Initial Catalog=""ciemna-system"";Integrated Security=True;TrustServerCertificate=True;";
 
         public booking()
@@ -110,22 +111,25 @@ namespace project_gui
         }
 
         // Runs automatically when the app starts
-        private void booking_Load(object sender, EventArgs e)
-        {
-            LoadBookings();
-            LoadDailyRevenue(); 
-        }
+       
 
 
         private void btnNext_Click(object sender, EventArgs e)
         {
             try
             {
-                int customerId = int.Parse(txtCustomerID.Text);
+                // Check if the user actually picked an ID from the dropdown
+                if (cmbCustomer.SelectedValue == null)
+                {
+                    MessageBox.Show("Please select a Customer ID from the list.");
+                    return;
+                }
+
+                // Get the ID from the ComboBox
+                int customerId = (int)cmbCustomer.SelectedValue;
                 int showId = int.Parse(txtShowID.Text);
                 decimal amount = 0;
 
-                // Find the price of the show from the database
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
@@ -140,27 +144,22 @@ namespace project_gui
                     else
                     {
                         MessageBox.Show("Show Number not found!");
-                        return; // Stop if show doesn't exist
+                        return;
                     }
                 }
 
-                //  Open the Payment Form and pass the data to it
                 paymentform payForm = new paymentform(customerId, showId, amount);
                 if (payForm.ShowDialog() == DialogResult.OK || !payForm.Visible)
                 {
-                  
                     LoadBookings();
                     LoadDailyRevenue();
                 }
-
-
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error: Please enter valid numbers. " + ex.Message);
+                MessageBox.Show("Error: " + ex.Message);
             }
         }
-
 
 
         // Refreshes the DataGridView to show all bookings
@@ -186,6 +185,38 @@ namespace project_gui
                 lblRevenue.Text = "Today's Revenue: $" + (result != DBNull.Value ? result.ToString() : "0.00");
             }
         }
+        private void booking_Load(object sender, EventArgs e)
+        {
+            LoadCustomerList(); 
+            LoadBookings();
+            LoadDailyRevenue();
+        }
+        private void LoadCustomerList()
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                try
+                {
+                    
+                    string query = "SELECT customer_ID FROM Customer";
+                    SqlDataAdapter da = new SqlDataAdapter(query, conn);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+
+                    
+                    cmbCustomer.DataSource = dt;
+                    cmbCustomer.DisplayMember = "customer_ID"; // Shows the ID number in the list
+                    cmbCustomer.ValueMember = "customer_ID";   // Uses the ID number in the code
+
+                    cmbCustomer.SelectedIndex = -1; // Start with no ID selected
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error loading customer list: " + ex.Message);
+                }
+            }
+        }
+       
 
         // Cancels a booking using
         private void btnCancel_Click(object sender, EventArgs e)
@@ -206,7 +237,7 @@ namespace project_gui
                     {
                         MessageBox.Show("Booking Cancelled!");
 
-                        
+
                         LoadBookings();     // Update the table so 'Cancelled' shows up
                         LoadDailyRevenue(); // Update the revenue label so the money is removed
                     }
@@ -229,7 +260,7 @@ namespace project_gui
                 {
                     conn.Open();
                     // update the 'payment' table using a Subquery 
-                  
+
                     string sql = @"UPDATE payment 
                            SET Payment_Method = @method 
                            WHERE payment_id = (SELECT Payment_ID FROM Booking WHERE Booking_ID = @id)";
@@ -317,7 +348,6 @@ namespace project_gui
         }
     }
 }
-
 
 
 
@@ -655,6 +685,12 @@ namespace project_gui
             lblRevenue.Size = new Size(280, 32);
             lblRevenue.TabIndex = 3;
             lblRevenue.Text = "Today's Revenue: $0.00";
+            
+            cmbCustomer.FormattingEnabled = true;
+            cmbCustomer.Location = new Point(148, 40);
+            cmbCustomer.Name = "cmbCustomer";
+            cmbCustomer.Size = new Size(182, 33);
+            cmbCustomer.TabIndex = 5;
            
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
