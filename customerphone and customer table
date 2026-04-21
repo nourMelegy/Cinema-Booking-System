@@ -3,7 +3,7 @@ CREATE TABLE Customer (
     FirstName NVARCHAR(50) NOT NULL,
     LastName NVARCHAR(50) NOT NULL,
     Email NVARCHAR(100) NOT NULL UNIQUE, 
-    Password NVARCHAR(100) NOT NULL,
+    Password NVARCHAR(10) NOT NULL,
     CONSTRAINT CHK_Customer_Email 
     CHECK (Email LIKE '%_@_%._%')
 );
