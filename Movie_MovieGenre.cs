@@ -185,9 +185,9 @@ namespace movies
                 return;
             }
 
-            if (!decimal.TryParse(txtPrice.Text, out decimal percentage))
+            if (!decimal.TryParse(txtPrice.Text, out decimal price))
             {
-                MessageBox.Show("Enter valid percentage!");
+                MessageBox.Show("Enter valid price!");
                 return;
             }
 
@@ -199,7 +199,7 @@ namespace movies
                     cmd.CommandType = CommandType.StoredProcedure;
 
                     cmd.Parameters.AddWithValue("@EIDR", txtEIDR.Text);
-                    cmd.Parameters.AddWithValue("@PricePercentage", percentage);
+                    cmd.Parameters.AddWithValue("@NewPrice", price);
 
                     con.Open();
                     cmd.ExecuteNonQuery();
