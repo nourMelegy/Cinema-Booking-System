@@ -198,15 +198,15 @@ namespace project_gui
                 try
                 {
                     
-                    string query = "SELECT customer_ID FROM Customer";
+                    string query = "SELECT customer_ID FROM Customerfinal";
                     SqlDataAdapter da = new SqlDataAdapter(query, conn);
                     DataTable dt = new DataTable();
                     da.Fill(dt);
 
                     
                     cmbCustomer.DataSource = dt;
-                    cmbCustomer.DisplayMember = "customer_ID"; // Shows the ID number in the list
-                    cmbCustomer.ValueMember = "customer_ID";   // Uses the ID number in the code
+                    cmbCustomer.DisplayMember = "Customer_ID"; // Shows the ID number in the list
+                    cmbCustomer.ValueMember = "Customer_ID";   // Uses the ID number in the code
 
                     cmbCustomer.SelectedIndex = -1; // Start with no ID selected
                 }
