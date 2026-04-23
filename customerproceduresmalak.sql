@@ -10,6 +10,14 @@ BEGIN
     INSERT INTO Customerfinal (FirstName, LastName, Email, Password)
     VALUES ( @FirstName, @LastName, @Email, @Password);
 END;
+--delete customer from database(delete account)
+CREATE PROCEDURE DeleteCustomer
+    @CustomerID INT
+AS
+BEGIN
+    DELETE FROM Customerfinal
+    WHERE Customer_ID = @CustomerID;
+END;
 
 -- gives id, firstname, lastname,phone no,booking id, booking data, total amount
 CREATE PROCEDURE CustomerLoginWithDetails
@@ -40,6 +48,16 @@ AS
 BEGIN
     INSERT INTO CustomerPhonefinal (CustomerID, PhoneNo)
     VALUES (@CustomerID, @PhoneNo);
+END;
+--to delete phone number 
+CREATE PROCEDURE DeleteCustomerPhone
+    @CustomerID INT,
+    @PhoneNo    NVARCHAR(20)
+AS
+BEGIN
+    DELETE FROM CustomerPhonefinal
+    WHERE CustomerID = @CustomerID
+      AND PhoneNo    = @PhoneNo;
 END;
 --to get phone numbers 
 CREATE PROCEDURE GetCustomerPhones
