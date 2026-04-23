@@ -13,7 +13,7 @@ END;
 
 -- gives id, firstname, lastname,phone no,booking id, booking data, total amount
 CREATE PROCEDURE CustomerLoginWithDetails
-    @Email NVARCHAR(100),
+   @Email NVARCHAR(100),
     @Password NVARCHAR(10)
 AS
 BEGIN
@@ -22,16 +22,13 @@ BEGIN
         c.FirstName,
         c.LastName,
         c.Email,
-        cp.PhoneNo,
         b.Booking_ID,
         b.Booking_date,
         b.Total_Amount
     FROM Customerfinal c
-    LEFT JOIN CustomerPhonefinal cp 
-        ON c.Customer_ID = cp.CustomerID
     LEFT JOIN Booking b 
         ON c.Customer_ID = b.Customer_ID
-    WHERE c.Email = @Email
+    WHERE c.Email    = @Email
       AND c.Password = @Password;
 END;
 
@@ -44,7 +41,15 @@ BEGIN
     INSERT INTO CustomerPhonefinal (CustomerID, PhoneNo)
     VALUES (@CustomerID, @PhoneNo);
 END;
-
+--to get phone numbers 
+CREATE PROCEDURE GetCustomerPhones
+    @CustomerID INT
+AS
+BEGIN
+    SELECT PhoneNo
+    FROM CustomerPhonefinal
+    WHERE CustomerID = @CustomerID;
+END;
 
 
 
