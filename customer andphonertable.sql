@@ -14,6 +14,7 @@ CREATE TABLE CustomerPhonefinal (
     CONSTRAINT PKCustomerPhone 
     PRIMARY KEY (CustomerID, PhoneNo),
     CONSTRAINT CHKCustomerPhone CHECK (PhoneNo LIKE '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'),
+    CONSTRAINT UQ_Phone UNIQUE (PhoneNo),
     CONSTRAINT FK_CustomerPhone_Customer FOREIGN KEY (CustomerID) REFERENCES Customerfinal(Customer_ID)
     ON DELETE CASCADE
     ON UPDATE CASCADE );
