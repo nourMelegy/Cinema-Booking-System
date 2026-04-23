@@ -26,6 +26,17 @@ namespace databaseproject
         // wired in the Designer; click this to test the connection
         private void button1_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(cmbType.Text))
+            {
+                MessageBox.Show("Please select a transaction type");
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(cmbStatus1.Text))
+            {
+                MessageBox.Show("Please select a transaction status");
+                return;
+            }
             TestConnection();
             SqlConnection con = new SqlConnection(connStr);
             con.Open();
@@ -83,9 +94,17 @@ namespace databaseproject
                 row["Payment ID"] = reader["payment_id"];
                 dt.Rows.Add(row);
             }
-            dataGridView1.DataSource = dt;
             reader.Close();
             con.Close();
+            if (dt.Rows.Count == 0)
+            {
+                MessageBox.Show("No transactions found");
+                dataGridView1.DataSource = null;
+            }
+            else
+            {
+                dataGridView1.DataSource = dt;
+            }
         }
 
         private void filterbtn_Click(object sender, EventArgs e)
@@ -99,10 +118,23 @@ namespace databaseproject
             SqlDataReader reader = cmd.ExecuteReader();
             DataTable dt = new DataTable();
             dt.Load(reader);
-            dataGridView1.DataSource = dt;
             reader.Close();
             con.Close();
-
+            string status = trnstatus.Text;
+            if (string.IsNullOrWhiteSpace(trnstatus.Text))
+            {
+                MessageBox.Show("Please select a status first");
+                return;
+            }
+            if (dt.Rows.Count == 0)
+            {
+                MessageBox.Show("No " + status + " transactions found");
+                dataGridView1.DataSource = null;
+            }
+            else
+            {
+                dataGridView1.DataSource = dt;
+            }
         }
 
         private void trnstatus_SelectedIndexChanged(object sender, EventArgs e)
