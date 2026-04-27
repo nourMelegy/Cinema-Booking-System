@@ -1,0 +1,274 @@
+namespace HallManagementForm_2_
+{
+    partial class Form1
+    {
+        /// <summary>
+        ///  Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        ///  Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        ///  Required method for Designer support - do not modify
+        ///  the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            ShowHallCapacityGB = new GroupBox();
+            btnCheckCapacity = new Button();
+            SHC_TxtboxHallNo = new TextBox();
+            SHC_lbCapacityResult = new Label();
+            SHC_lbHallNo = new Label();
+            UpdateHallGB = new GroupBox();
+            UH_TxtboxNewHallCap = new TextBox();
+            UH_TxtboxHallNo = new TextBox();
+            UH_lbNewHallCap = new Label();
+            UH_lbHallNo = new Label();
+            btnUpdateHall = new Button();
+            ShowMoviesinHallGB = new GroupBox();
+            SMIH_TxtboxHallNo = new TextBox();
+            SMIH_lbHallNo = new Label();
+            dataGridView1 = new DataGridView();
+            btnShowMovies = new Button();
+            label1 = new Label();
+            ShowHallCapacityGB.SuspendLayout();
+            UpdateHallGB.SuspendLayout();
+            ShowMoviesinHallGB.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            SuspendLayout();
+            // 
+            // ShowHallCapacityGB
+            // 
+            ShowHallCapacityGB.Controls.Add(btnCheckCapacity);
+            ShowHallCapacityGB.Controls.Add(SHC_TxtboxHallNo);
+            ShowHallCapacityGB.Controls.Add(SHC_lbCapacityResult);
+            ShowHallCapacityGB.Controls.Add(SHC_lbHallNo);
+            ShowHallCapacityGB.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            ShowHallCapacityGB.Location = new Point(77, 53);
+            ShowHallCapacityGB.Name = "ShowHallCapacityGB";
+            ShowHallCapacityGB.Size = new Size(314, 187);
+            ShowHallCapacityGB.TabIndex = 0;
+            ShowHallCapacityGB.TabStop = false;
+            ShowHallCapacityGB.Text = "Show Hall Capacity ";
+            // 
+            // btnCheckCapacity
+            // 
+            btnCheckCapacity.Font = new Font("Segoe UI Semibold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnCheckCapacity.Location = new Point(51, 133);
+            btnCheckCapacity.Name = "btnCheckCapacity";
+            btnCheckCapacity.Size = new Size(174, 39);
+            btnCheckCapacity.TabIndex = 3;
+            btnCheckCapacity.Text = "Show Capacity";
+            btnCheckCapacity.UseVisualStyleBackColor = true;
+            btnCheckCapacity.Click += btnCheckCapacity_Click;
+            // 
+            // SHC_TxtboxHallNo
+            // 
+            SHC_TxtboxHallNo.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            SHC_TxtboxHallNo.Location = new Point(171, 48);
+            SHC_TxtboxHallNo.Name = "SHC_TxtboxHallNo";
+            SHC_TxtboxHallNo.Size = new Size(73, 27);
+            SHC_TxtboxHallNo.TabIndex = 2;
+            // 
+            // SHC_lbCapacityResult
+            // 
+            SHC_lbCapacityResult.AutoSize = true;
+            SHC_lbCapacityResult.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            SHC_lbCapacityResult.Location = new Point(23, 91);
+            SHC_lbCapacityResult.Name = "SHC_lbCapacityResult";
+            SHC_lbCapacityResult.Size = new Size(116, 20);
+            SHC_lbCapacityResult.TabIndex = 1;
+            SHC_lbCapacityResult.Text = "Capacity Result:";
+            // 
+            // SHC_lbHallNo
+            // 
+            SHC_lbHallNo.AutoSize = true;
+            SHC_lbHallNo.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            SHC_lbHallNo.Location = new Point(23, 48);
+            SHC_lbHallNo.Name = "SHC_lbHallNo";
+            SHC_lbHallNo.Size = new Size(142, 20);
+            SHC_lbHallNo.TabIndex = 0;
+            SHC_lbHallNo.Text = "Enter Hall Number:";
+            // 
+            // UpdateHallGB
+            // 
+            UpdateHallGB.Controls.Add(UH_TxtboxNewHallCap);
+            UpdateHallGB.Controls.Add(UH_TxtboxHallNo);
+            UpdateHallGB.Controls.Add(UH_lbNewHallCap);
+            UpdateHallGB.Controls.Add(UH_lbHallNo);
+            UpdateHallGB.Controls.Add(btnUpdateHall);
+            UpdateHallGB.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            UpdateHallGB.Location = new Point(734, 53);
+            UpdateHallGB.Name = "UpdateHallGB";
+            UpdateHallGB.Size = new Size(292, 187);
+            UpdateHallGB.TabIndex = 1;
+            UpdateHallGB.TabStop = false;
+            UpdateHallGB.Text = "Update Hall";
+            // 
+            // UH_TxtboxNewHallCap
+            // 
+            UH_TxtboxNewHallCap.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            UH_TxtboxNewHallCap.Location = new Point(173, 91);
+            UH_TxtboxNewHallCap.Name = "UH_TxtboxNewHallCap";
+            UH_TxtboxNewHallCap.Size = new Size(68, 27);
+            UH_TxtboxNewHallCap.TabIndex = 4;
+            // 
+            // UH_TxtboxHallNo
+            // 
+            UH_TxtboxHallNo.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            UH_TxtboxHallNo.Location = new Point(154, 48);
+            UH_TxtboxHallNo.Name = "UH_TxtboxHallNo";
+            UH_TxtboxHallNo.Size = new Size(79, 27);
+            UH_TxtboxHallNo.TabIndex = 3;
+            UH_TxtboxHallNo.TextChanged += textBox1_TextChanged;
+            // 
+            // UH_lbNewHallCap
+            // 
+            UH_lbNewHallCap.AutoSize = true;
+            UH_lbNewHallCap.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            UH_lbNewHallCap.Location = new Point(6, 91);
+            UH_lbNewHallCap.Name = "UH_lbNewHallCap";
+            UH_lbNewHallCap.Size = new Size(170, 20);
+            UH_lbNewHallCap.TabIndex = 2;
+            UH_lbNewHallCap.Text = "Enter new hall capacity:";
+            // 
+            // UH_lbHallNo
+            // 
+            UH_lbHallNo.AutoSize = true;
+            UH_lbHallNo.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            UH_lbHallNo.Location = new Point(6, 48);
+            UH_lbHallNo.Name = "UH_lbHallNo";
+            UH_lbHallNo.Size = new Size(142, 20);
+            UH_lbHallNo.TabIndex = 1;
+            UH_lbHallNo.Text = "Enter Hall Number:";
+            // 
+            // btnUpdateHall
+            // 
+            btnUpdateHall.Font = new Font("Segoe UI Semibold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnUpdateHall.Location = new Point(58, 133);
+            btnUpdateHall.Name = "btnUpdateHall";
+            btnUpdateHall.Size = new Size(149, 39);
+            btnUpdateHall.TabIndex = 0;
+            btnUpdateHall.Text = "Update Hall";
+            btnUpdateHall.UseVisualStyleBackColor = true;
+            btnUpdateHall.Click += btnUpdateHall_Click;
+            // 
+            // ShowMoviesinHallGB
+            // 
+            ShowMoviesinHallGB.Controls.Add(SMIH_TxtboxHallNo);
+            ShowMoviesinHallGB.Controls.Add(SMIH_lbHallNo);
+            ShowMoviesinHallGB.Controls.Add(dataGridView1);
+            ShowMoviesinHallGB.Controls.Add(btnShowMovies);
+            ShowMoviesinHallGB.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            ShowMoviesinHallGB.Location = new Point(12, 246);
+            ShowMoviesinHallGB.Name = "ShowMoviesinHallGB";
+            ShowMoviesinHallGB.Size = new Size(1158, 227);
+            ShowMoviesinHallGB.TabIndex = 4;
+            ShowMoviesinHallGB.TabStop = false;
+            ShowMoviesinHallGB.Text = "Show Movies in Hall";
+            // 
+            // SMIH_TxtboxHallNo
+            // 
+            SMIH_TxtboxHallNo.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            SMIH_TxtboxHallNo.Location = new Point(154, 90);
+            SMIH_TxtboxHallNo.Name = "SMIH_TxtboxHallNo";
+            SMIH_TxtboxHallNo.Size = new Size(90, 27);
+            SMIH_TxtboxHallNo.TabIndex = 3;
+            // 
+            // SMIH_lbHallNo
+            // 
+            SMIH_lbHallNo.AutoSize = true;
+            SMIH_lbHallNo.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            SMIH_lbHallNo.Location = new Point(6, 90);
+            SMIH_lbHallNo.Name = "SMIH_lbHallNo";
+            SMIH_lbHallNo.Size = new Size(142, 20);
+            SMIH_lbHallNo.TabIndex = 2;
+            SMIH_lbHallNo.Text = "Enter Hall Number:";
+            // 
+            // dataGridView1
+            // 
+            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView1.Location = new Point(350, 26);
+            dataGridView1.Name = "dataGridView1";
+            dataGridView1.RowHeadersWidth = 51;
+            dataGridView1.Size = new Size(795, 183);
+            dataGridView1.TabIndex = 1;
+            // 
+            // btnShowMovies
+            // 
+            btnShowMovies.Font = new Font("Segoe UI Semibold", 10.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnShowMovies.Location = new Point(51, 165);
+            btnShowMovies.Name = "btnShowMovies";
+            btnShowMovies.Size = new Size(188, 44);
+            btnShowMovies.TabIndex = 0;
+            btnShowMovies.Text = "Show Movies ";
+            btnShowMovies.UseVisualStyleBackColor = true;
+            btnShowMovies.Click += btnShowMovies_Click;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 16.2F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label1.Location = new Point(491, 11);
+            label1.Name = "label1";
+            label1.Size = new Size(245, 38);
+            label1.TabIndex = 5;
+            label1.Text = "Hall Managment ";
+            // 
+            // Form1
+            // 
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(1203, 485);
+            Controls.Add(label1);
+            Controls.Add(ShowMoviesinHallGB);
+            Controls.Add(UpdateHallGB);
+            Controls.Add(ShowHallCapacityGB);
+            Name = "Form1";
+            Text = "Form1";
+            ShowHallCapacityGB.ResumeLayout(false);
+            ShowHallCapacityGB.PerformLayout();
+            UpdateHallGB.ResumeLayout(false);
+            UpdateHallGB.PerformLayout();
+            ShowMoviesinHallGB.ResumeLayout(false);
+            ShowMoviesinHallGB.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
+        }
+
+        #endregion
+
+        private GroupBox ShowHallCapacityGB;
+        private GroupBox UpdateHallGB;
+        private GroupBox ShowMoviesinHallGB;
+        private Label label1;
+        private Button btnCheckCapacity;
+        private TextBox SHC_TxtboxHallNo;
+        private Label SHC_lbCapacityResult;
+        private Label SHC_lbHallNo;
+        private Button btnUpdateHall;
+        private DataGridView dataGridView1;
+        private Button btnShowMovies;
+        private Label UH_lbNewHallCap;
+        private Label UH_lbHallNo;
+        private Label SMIH_lbHallNo;
+        private TextBox UH_TxtboxHallNo;
+        private TextBox UH_TxtboxNewHallCap;
+        private TextBox SMIH_TxtboxHallNo;
+    }
+}
