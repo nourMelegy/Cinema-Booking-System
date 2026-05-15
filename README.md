@@ -28,59 +28,9 @@ A comprehensive cinema ticket booking application that enables users to browse m
 
 ## Tech Stack
 
-- **Frontend**: [Your Frontend Framework - e.g., React, Vue, Angular]
-- **Backend**: [Your Backend Language - e.g., Node.js/Express, Python/Django, Java/Spring]
-- **Database**: [Your Database - e.g., MongoDB, PostgreSQL, MySQL]
-- **Authentication**: JWT / OAuth
-- **Payment Gateway**: [e.g., Stripe, PayPal]
-- **Hosting**: [Your hosting platform]
-
-## Installation
-
-### Prerequisites
-
-- Node.js v14+ or Python 3.8+ (depending on your stack)
-- npm or pip package manager
-- Database setup (MongoDB/PostgreSQL/MySQL)
-
-### Setup Instructions
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/nourMelegy/Cinema-Booking-System.git
-   cd Cinema-Booking-System
-   ```
-
-2. **Install dependencies**
-   ```bash
-   # For Node.js/Frontend
-   npm install
-   
-   # For Python backend
-   pip install -r requirements.txt
-   ```
-
-3. **Configure environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
-
-4. **Setup database**
-   ```bash
-   # Run migrations or setup scripts
-   npm run migrate
-   # or
-   python manage.py migrate
-   ```
-
-5. **Start the application**
-   ```bash
-   # Development mode
-   npm run dev
-   # or
-   python manage.py runserver
-   ```
+- **Frontend**: Windows Form
+- **Backend**: C#
+- **Database**: SQL
 
 ## Usage
 
@@ -167,31 +117,8 @@ Key tables:
 - **seats**: Cinema seats with availability status
 - **payments**: Payment transaction records
 
-## Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-Please ensure your code follows the project's coding standards and includes appropriate tests.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Support
-
-For support, please open an issue on the GitHub repository or contact [your-email@example.com].
-
 ## Acknowledgments
 
 - Thanks to all contributors who have helped with this project
 - Inspired by modern cinema booking platforms
 
----
-
-**Note**: This is a template README. Please update the sections marked with brackets to match your specific implementation, technology stack, and project details.
